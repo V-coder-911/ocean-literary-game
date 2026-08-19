@@ -1,0 +1,625 @@
+{% extends "base.html" %}
+
+{% block title %}OceanQuest - Ocean Knowledge Quiz{% endblock %}
+
+{% block extra_head %}
+<style>
+    .quiz-card {
+        max-width: 650px;
+        margin: 40px auto;
+        min-height: 420px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .diff-selector-card {
+        cursor: pointer;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid rgba(0, 180, 216, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .diff-selector-card:hover {
+        border-color: var(--primary-cyan);
+        transform: translateY(-4px);
+        background: rgba(0, 245, 212, 0.04);
+    }
+
+    .q-timer-container {
+        width: 100%;
+        height: 6px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 3px;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+
+    .q-timer-bar {
+        height: 100%;
+        background: var(--primary-cyan);
+        width: 100%;
+        transition: width 0.1s linear;
+    }
+
+    .quiz-options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 20px 0;
+    }
+
+    .quiz-opt-btn {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: var(--text-light);
+        padding: 15px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: left;
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .quiz-opt-btn:hover {
+        background: rgba(0, 180, 216, 0.08);
+        border-color: var(--secondary-blue);
+    }
+    
+    .quiz-opt-btn.correct {
+        background: rgba(46, 196, 182, 0.15) !important;
+        border-color: var(--color-safe) !important;
+        color: var(--color-safe);
+    }
+    
+    .quiz-opt-btn.incorrect {
+        background: rgba(255, 77, 77, 0.15) !important;
+        border-color: var(--color-danger) !important;
+        color: var(--color-danger);
+    }
+
+    .progress-dots {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .dot-step {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.08);
+    }
+
+    .dot-step.active {
+        background: var(--primary-cyan);
+    }
+
+    .dot-step.correct {
+        background: var(--color-safe);
+    }
+
+    .dot-step.incorrect {
+        background: var(--color-danger);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <!-- Stage 1: Choose Difficulty -->
+    <div id="difficulty-stage" style="text-align: center;">
+        <h1 style="font-size: 2.3rem; color: var(--primary-cyan); margin-bottom: 10px;">OCEAN KNOWLEDGE QUIZ</h1>
+        <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 40px auto;">Test your understanding of ocean currents, weather anomalies, and survival techniques. Choose a difficulty level to initialize your examination.</p>
+        
+        <div class="grid-4" style="max-width: 900px; margin: 0 auto;">
+            
+            <div class="glass-card diff-selector-card" onclick="startQuiz('easy')">
+                <span class="badge-status status-safe" style="margin-bottom: 15px;">EASY</span>
+                <h3 style="margin-bottom: 10px;">Rookie Deck</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Basic concepts about tides, fish safety, and coastlines.</p>
+            </div>
+            
+            <div class="glass-card diff-selector-card" onclick="startQuiz('medium')">
+                <span class="badge-status status-caution" style="margin-bottom: 15px;">MEDIUM</span>
+                <h3 style="margin-bottom: 10px;">Sea Watcher</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Wind speeds, sea temperature shifts, and marine ecology.</p>
+            </div>
+            
+            <div class="glass-card diff-selector-card" onclick="startQuiz('hard')">
+                <span class="badge-status status-warning" style="margin-bottom: 15px;">HARD</span>
+                <h3 style="margin-bottom: 10px;">Navigator</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Tsunamis, storm surge warnings, and deep-sea current pathways.</p>
+            </div>
+            
+            <div class="glass-card diff-selector-card" onclick="startQuiz('expert')">
+                <span class="badge-status status-danger" style="margin-bottom: 15px;">EXPERT</span>
+                <h3 style="margin-bottom: 10px;">Ocean Master</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Coriolis effects, INCOIS data modeling, and barometric telemetry.</p>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Stage 2: Active Quiz Interface -->
+    <div id="quiz-stage" style="display: none;">
+        <div class="glass-card quiz-card">
+            
+            <!-- Quiz Card Header -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span id="quiz-level-badge" class="badge-status status-safe">EASY QUIZ</span>
+                    <span id="question-counter" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Question 1 of 5</span>
+                </div>
+                
+                <div class="q-timer-container">
+                    <div class="q-timer-bar" id="q-timer-bar"></div>
+                </div>
+                
+                <h3 id="question-text" style="color: #FFF; line-height: 1.5; font-size: 1.15rem; margin-top: 10px;">Loading question details...</h3>
+            </div>
+
+            <!-- Quiz Options -->
+            <div>
+                <div class="quiz-options-list" id="options-container">
+                    <!-- Dynamic choices added in JS -->
+                </div>
+                
+                <!-- Feedback Box -->
+                <div id="quiz-feedback-box" style="display: none; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 15px; text-align: left; font-size: 0.85rem; margin-bottom: 15px;">
+                    <strong style="color: var(--primary-cyan); display: block; margin-bottom: 5px;" id="feedback-title">Explanation:</strong>
+                    <span id="feedback-explanation">Loading feedback text...</span>
+                </div>
+            </div>
+
+            <!-- Footer Action & Dots -->
+            <div>
+                <button id="next-question-btn" class="btn-glow" style="width: 100%; display: none;" onclick="goToNextQuestion()">
+                    NEXT QUESTION <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                
+                <div class="progress-dots" id="dots-container">
+                    <div class="dot-step active"></div>
+                    <div class="dot-step"></div>
+                    <div class="dot-step"></div>
+                    <div class="dot-step"></div>
+                    <div class="dot-step"></div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Stage 3: Results Scorecard -->
+    <div id="results-stage" style="display: none; text-align: center;">
+        <div class="glass-card" style="max-width: 500px; margin: 40px auto; padding: 40px;">
+            <div style="font-size: 4rem; color: var(--primary-cyan); margin-bottom: 15px;">
+                <i class="fa-solid fa-award"></i>
+            </div>
+            
+            <h2 style="font-size: 2.2rem; color: #FFF; margin-bottom: 5px;">QUIZ COMPLETED</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px;">You have finalized the simulation test</p>
+            
+            <div style="margin-bottom: 30px;">
+                <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Your Ocean IQ Rating</div>
+                <div style="font-size: 4.5rem; font-weight: 800; color: var(--primary-cyan); text-shadow: 0 0 25px rgba(0, 245, 212, 0.4);" id="final-iq">80%</div>
+                <p id="final-message" style="color: var(--text-light); font-weight: 500; font-size: 1.05rem; margin-top: 10px;">"Excellent! You are becoming an Ocean Guardian."</p>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); padding: 15px; border-radius: 12px; margin-bottom: 30px; display: flex; justify-content: space-around;">
+                <div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Correct</div>
+                    <strong style="font-size: 1.25rem; color: var(--color-safe);" id="final-correct">4 / 5</strong>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">XP Earned</div>
+                    <strong style="font-size: 1.25rem; color: var(--secondary-blue);" id="final-xp">+250</strong>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Points Earned</div>
+                    <strong style="font-size: 1.25rem; color: var(--primary-cyan);" id="final-points">+100</strong>
+                </div>
+            </div>
+
+            <form id="submit-quiz-form" action="{{ url_for('submit_quiz') }}" method="POST">
+                <input type="hidden" name="score" id="post-score" value="0">
+                <input type="hidden" name="difficulty" id="post-diff" value="easy">
+                
+                <button type="submit" class="btn-glow" style="width: 100%;">
+                    CLAIM REWARDS & SAVE RECORD <i class="fa-solid fa-cloud-arrow-up"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Quiz Questions Database - Loaded on client side for zero lag on Android/Windows
+    const questionsDatabase = {
+        easy: [
+            {
+                q: "What is a potential fishing zone (PFZ)?",
+                a: "An area with high concentration of phytoplankton and fish populations, indicated by SST and Chlorophyll.",
+                b: "An area close to industrial ports where ships dump food waste.",
+                c: "A designated marine boundary where fishing is strictly prohibited.",
+                ans: "A",
+                explain: "PFZ advisories are generated using ocean satellite measurements of Sea Surface Temperature (SST) and chlorophyll to locate nutrient-rich waters where fish gather."
+            },
+            {
+                q: "If wave height is reported as 0.8 meters, is it safe for a small fishing vessel?",
+                a: "Yes, this wave height represents calm to slight sea conditions.",
+                b: "No, waves above 0.5m always capsize fishing vessels.",
+                c: "Only if the wind speed is greater than 60 km/h.",
+                ans: "A",
+                explain: "Waves below 1.5m are generally considered low wave heights and represent safe conditions for general marine activity and small boats."
+            },
+            {
+                q: "Which organization in India provides official Ocean Advisory information?",
+                a: "INCOIS (Indian National Centre for Ocean Information Services)",
+                b: "BCCI (Board of Control for Cricket in India)",
+                c: "ISRO (Indian Space Research Organisation)",
+                ans: "A",
+                explain: "INCOIS, located in Hyderabad, is the official government agency providing marine forecasts, PFZ alerts, and tsunami warnings."
+            },
+            {
+                q: "What should you do if you notice sea water receding rapidly from the coastline?",
+                a: "Immediately run to higher ground inland, as this is a sign of an approaching tsunami.",
+                b: "Walk out onto the beach to collect stranded fish and sea shells.",
+                c: "Wait on the beach for the waves to return.",
+                ans: "A",
+                explain: "A receding shoreline is a classic warning sign of a tsunami wave. You must evacuate to high ground immediately."
+            },
+            {
+                q: "What does a green flag mean on a beach advisory post?",
+                a: "Safe: Calm conditions, swimming and tourism activities are permitted.",
+                b: "Caution: Stay out of the water.",
+                c: "Danger: Extreme current warning, evacuating beach.",
+                ans: "A",
+                explain: "Green flag represents safe, normal ocean conditions. Yellow represents caution, and red represents danger/do not enter."
+            }
+        ],
+        medium: [
+            {
+                q: "Why is Sea Surface Temperature (SST) important for fish forecasting?",
+                a: "Fish are sensitive to thermal boundaries, and gather near temperature gradients where nutrients rise.",
+                b: "Warm water has more oxygen than cold water, attracting schools of fish.",
+                c: "SST tells us the depth of the ocean bed.",
+                ans: "A",
+                explain: "Temperature fronts (sharp gradients in SST) create upwelling zones that bring nutrients to the surface, attracting baitfish and predators."
+            },
+            {
+                q: "At what wind speed should tourism boat operators begin exercising high caution?",
+                a: "Above 35 km/h, as wind creates choppy waves and hazards for small hulls.",
+                b: "Wind speed has no effect on small tourism craft.",
+                c: "Only above 90 km/h.",
+                ans: "A",
+                explain: "Winds exceeding 30-35 km/h lead to moderate-to-rough sea states, producing spray and wave crests that make small pleasure craft operations unsafe."
+            },
+            {
+                q: "What is the main driver of surface ocean currents?",
+                a: "Wind blowing across the ocean surface.",
+                b: "Tidal forces from the moon.",
+                c: "Underwater earthquakes.",
+                ans: "A",
+                explain: "Global wind patterns, combined with the Earth's rotation (Coriolis Effect), drive the large-scale circulation of surface currents."
+            },
+            {
+                q: "What indicator suggests an approaching cyclonic disturbance in the Bay of Bengal?",
+                a: "A drop in barometric pressure, accompanied by rising swells and winds.",
+                b: "Suddenly rising sea surface temperatures above 35°C.",
+                c: "A decrease in salinity near estuaries.",
+                ans: "A",
+                explain: "Cyclones are low-pressure systems. Rapidly falling barometric pressure and intensifying waves/winds are primary diagnostic indicators."
+            },
+            {
+                q: "Why are coral reefs highly sensitive to rising ocean temperatures?",
+                a: "Warmer water causes bleaching, where corals expel their symbiotic algae (zooxanthellae).",
+                b: "Warm water dissolves coral skeleton calcium structures.",
+                c: "Warm water blocks sunlight from reaching deep corals.",
+                ans: "A",
+                explain: "Bleaching occurs when sea temperatures rise even 1-2°C above seasonal maximums. Corals lose their primary food source (algae) and can die."
+            }
+        ],
+        hard: [
+            {
+                q: "Which wave parameter is most dangerous for anchored ships near shallow harbor entrances?",
+                a: "Long-period wave swells, which grow exponentially in height as they reach shallow depths.",
+                b: "Short waves generated by local breeze.",
+                c: "Ocean floor thermal currents.",
+                ans: "A",
+                explain: "Long-period swells travel far from deep oceans. As they hit shallow harbor bars, their energy compresses, creating huge breaking waves (shoaling)."
+            },
+            {
+                q: "What triggers a Tsunami Advisory bulletin?",
+                a: "Undersea earthquakes of magnitude greater than 6.5, landslides, or volcanic eruptions.",
+                b: "Strong seasonal monsoon winds.",
+                c: "Sudden rises in Sea Surface Temperature near coastal bays.",
+                ans: "A",
+                explain: "Tsunamis are gravity waves generated by displacement of a large volume of water, typically caused by shallow, high-magnitude marine earthquakes."
+            },
+            {
+                q: "What is 'Upwelling' and why is it crucial for marine ecosystems?",
+                a: "Deep, cold, nutrient-rich water rising to replace warmer surface water blown away by winds.",
+                b: "The evaporation of water from coastal salt pans.",
+                c: "Rainfall deposits adding fresh water to the surface layers.",
+                ans: "A",
+                explain: "Upwelling brings nitrates and phosphates from the deep, triggering phytoplankton blooms which form the foundation of the marine food chain."
+            },
+            {
+                q: "What is a 'Rip Current'?",
+                a: "A narrow, fast channel of water flowing seaward from the shore, dangerous to swimmers.",
+                b: "A high-velocity current carrying warm water to the poles.",
+                c: "The circular rotation of water inside bays.",
+                ans: "A",
+                explain: "Rip currents are formed by breaking waves pushing water shoreward, which then drains back into the ocean through low points in sandbars, creating a strong outbound flow."
+            },
+            {
+                q: "How does ocean acidification occur?",
+                a: "The ocean absorbing excess carbon dioxide (CO2) from the atmosphere, creating carbonic acid.",
+                b: "Industrial chemicals dumped directly by tankers.",
+                c: "Excess rainwater mixing with marine salt.",
+                ans: "A",
+                explain: "Over 30% of anthropogenic CO2 emissions dissolve into oceans, lowering the pH level and hindering shell-building organisms from making calcium shells."
+            }
+        ],
+        expert: [
+            {
+                q: "How does the Coriolis effect alter wind and current directions in the Northern Hemisphere?",
+                a: "Deflects them to the right of their direction of travel.",
+                b: "Deflects them to the left of their direction of travel.",
+                c: "Deflects them directly toward the equator.",
+                ans: "A",
+                explain: "Coriolis force deflects moving objects to the right in the Northern Hemisphere and to the left in the Southern Hemisphere due to Earth's rotation."
+            },
+            {
+                q: "What is the function of DART buoys?",
+                a: "Detecting pressure changes on the sea floor to verify and track tsunami wave propagation.",
+                b: "Measuring SST shifts to predict El Niño anomalies.",
+                c: "Tracking pelagic tuna migration routes using sonar.",
+                ans: "A",
+                explain: "Deep-ocean Assessment and Reporting of Tsunamis (DART) uses pressure sensors on the seafloor to measure tsunami waves passing overhead, transmitting records via buoy."
+            },
+            {
+                q: "What oceanographic phenomenon describes the transition layer between warm surface water and cold deep water?",
+                a: "Thermocline",
+                b: "Halocline",
+                c: "Pycnocline",
+                ans: "A",
+                explain: "The thermocline is the marine depth layer where temperature decreases rapidly with increasing depth, separating warm mixed layers from freezing deep water."
+            },
+            {
+                q: "How does El Niño impact the Indian Monsoon?",
+                a: "It typically weakens the monsoonal winds, causing droughts or below-average rainfall.",
+                b: "It causes hyper-intensified storms and flooding across India.",
+                c: "It has no observable connection to rainfall in Southern Asia.",
+                ans: "A",
+                explain: "El Niño alters the atmospheric Walker Circulation. The warm anomalies in the Pacific suppress upwelling and atmospheric convection over the Indian Ocean, weakening monsoons."
+            },
+            {
+                q: "What is the primary cause of the 'Indian Ocean Dipole' (IOD)?",
+                a: "A temperature difference between the western (African coast) and eastern (Indonesian coast) Indian Ocean.",
+                b: "Tectonic movements along the Sunda Trench.",
+                c: "Changes in salinity inside the Bay of Bengal.",
+                ans: "A",
+                explain: "The IOD is an ocean-atmosphere phenomenon. Positive phase features warmer western Indian Ocean waters (causing rain in India/Africa) and cooler eastern waters."
+            }
+        ]
+    };
+
+    let activeQuestions = [];
+    let currentQIndex = 0;
+    let score = 0;
+    let timerInterval = null;
+    let timePerQ = 20; // 20s
+    let activeDifficulty = 'easy';
+    let countdownSecs = 20;
+
+    function startQuiz(difficulty) {
+        activeDifficulty = difficulty;
+        activeQuestions = [...questionsDatabase[difficulty]].sort(() => Math.random() - 0.5).slice(0, 5);
+        currentQIndex = 0;
+        score = 0;
+
+        // Change layout
+        document.getElementById('difficulty-stage').style.display = 'none';
+        document.getElementById('quiz-stage').style.display = 'block';
+        
+        // Update difficulty header
+        const badge = document.getElementById('quiz-level-badge');
+        badge.innerText = `${difficulty.toUpperCase()} QUIZ`;
+        badge.className = 'badge-status';
+        if (difficulty === 'easy') badge.classList.add('status-safe');
+        if (difficulty === 'medium') badge.classList.add('status-caution');
+        if (difficulty === 'hard') badge.classList.add('status-warning');
+        if (difficulty === 'expert') badge.classList.add('status-danger');
+
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (currentQIndex >= activeQuestions.length) {
+            showFinalScorecard();
+            return;
+        }
+
+        const qData = activeQuestions[currentQIndex];
+        
+        // Hide next button, hide explanation
+        document.getElementById('next-question-btn').style.display = 'none';
+        document.getElementById('quiz-feedback-box').style.display = 'none';
+        
+        // Load texts
+        document.getElementById('question-counter').innerText = `Question ${currentQIndex + 1} of 5`;
+        document.getElementById('question-text').innerText = qData.q;
+        
+        // Load Options
+        const container = document.getElementById('options-container');
+        container.innerHTML = `
+            <button class="quiz-opt-btn" onclick="selectAnswer('A', this)">
+                <strong style="color: var(--primary-cyan);">A</strong> ${qData.a}
+            </button>
+            <button class="quiz-opt-btn" onclick="selectAnswer('B', this)">
+                <strong style="color: var(--primary-cyan);">B</strong> ${qData.b}
+            </button>
+            <button class="quiz-opt-btn" onclick="selectAnswer('C', this)">
+                <strong style="color: var(--primary-cyan);">C</strong> ${qData.c}
+            </button>
+        `;
+
+        // Reset progress dots
+        updateDots();
+
+        // Start Timer
+        resetTimer();
+    }
+
+    function updateDots() {
+        const container = document.getElementById('dots-container');
+        container.innerHTML = '';
+        for (let i = 0; i < activeQuestions.length; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot-step');
+            if (i === currentQIndex) {
+                dot.classList.add('active');
+            } else if (i < currentQIndex) {
+                // Determine if correct or wrong
+                // We'll track correctness in a separate array or attribute
+                const answeredData = activeQuestions[i];
+                if (answeredData.user_correct) {
+                    dot.classList.add('correct');
+                } else {
+                    dot.classList.add('incorrect');
+                }
+            }
+            container.appendChild(dot);
+        }
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        countdownSecs = 20;
+        const bar = document.getElementById('q-timer-bar');
+        bar.style.width = '100%';
+        bar.style.background = 'var(--primary-cyan)';
+        
+        timerInterval = setInterval(() => {
+            countdownSecs -= 0.1;
+            const pct = (countdownSecs / 20) * 100;
+            bar.style.width = `${pct}%`;
+
+            if (countdownSecs <= 6) {
+                bar.style.background = 'var(--color-danger)';
+            } else if (countdownSecs <= 12) {
+                bar.style.background = 'var(--color-caution)';
+            }
+            
+            if (countdownSecs <= 0) {
+                clearInterval(timerInterval);
+                // Force time out answer
+                timeOutAnswer();
+            }
+        }, 100);
+    }
+
+    function selectAnswer(choice, btnEl) {
+        clearInterval(timerInterval);
+        const qData = activeQuestions[currentQIndex];
+        const correctAns = qData.ans;
+        
+        const options = document.querySelectorAll('.quiz-opt-btn');
+        options.forEach(opt => {
+            opt.disabled = true; // disable all options
+        });
+
+        if (choice === correctAns) {
+            btnEl.classList.add('correct');
+            score++;
+            activeQuestions[currentQIndex].user_correct = true;
+            document.getElementById('feedback-title').innerText = "✓ CORRECT DECISION";
+            document.getElementById('feedback-title').style.color = "var(--color-safe)";
+        } else {
+            btnEl.classList.add('incorrect');
+            activeQuestions[currentQIndex].user_correct = false;
+            // Highlight correct one
+            options.forEach(opt => {
+                if (opt.innerText.trim().startsWith(correctAns)) {
+                    opt.classList.add('correct');
+                }
+            });
+            document.getElementById('feedback-title').innerText = "✗ WARNING - INCORRECT";
+            document.getElementById('feedback-title').style.color = "var(--color-danger)";
+        }
+
+        // Show Explanation
+        document.getElementById('feedback-explanation').innerText = qData.explain;
+        document.getElementById('quiz-feedback-box').style.display = 'block';
+        
+        // Show Next button
+        document.getElementById('next-question-btn').style.display = 'block';
+    }
+
+    function timeOutAnswer() {
+        const qData = activeQuestions[currentQIndex];
+        activeQuestions[currentQIndex].user_correct = false;
+        
+        const options = document.querySelectorAll('.quiz-opt-btn');
+        options.forEach(opt => {
+            opt.disabled = true;
+            if (opt.innerText.trim().startsWith(qData.ans)) {
+                opt.classList.add('correct');
+            }
+        });
+
+        document.getElementById('feedback-title').innerText = "⌛ TIME EXPIRED";
+        document.getElementById('feedback-title').style.color = "var(--color-danger)";
+        document.getElementById('feedback-explanation').innerText = "You exceeded the 20-second threshold. " + qData.explain;
+        document.getElementById('quiz-feedback-box').style.display = 'block';
+        document.getElementById('next-question-btn').style.display = 'block';
+    }
+
+    function goToNextQuestion() {
+        currentQIndex++;
+        loadQuestion();
+    }
+
+    function showFinalScorecard() {
+        document.getElementById('quiz-stage').style.display = 'none';
+        document.getElementById('results-stage').style.display = 'block';
+
+        const iq = (score / 5) * 100;
+        document.getElementById('final-iq').innerText = `${iq}%`;
+        document.getElementById('final-correct').innerText = `${score} / 5`;
+        
+        // XP and point rules
+        const pointsAwarded = score * 20; // 20 pts per question
+        const xpAwarded = score * 50; // 50 XP per question
+        
+        document.getElementById('final-xp').innerText = `+${xpAwarded}`;
+        document.getElementById('final-points').innerText = `+${pointsAwarded}`;
+        
+        let msg = "";
+        if (iq >= 80) {
+            msg = "Excellent! You are becoming an Ocean Guardian.";
+        } else if (iq >= 60) {
+            msg = "Good effort! Learn more modules to enhance your safety IQ.";
+        } else {
+            msg = "Warning: Poor Ocean literacy may lead to dangerous maritime operations. Retry the quiz!";
+        }
+        document.getElementById('final-message').innerText = `"${msg}"`;
+
+        // Update form values for database submission
+        document.getElementById('post-score').value = iq;
+        document.getElementById('post-diff').value = activeDifficulty;
+    }
+</script>
+{% endblock %}

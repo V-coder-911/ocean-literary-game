@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}OceanQuest - Admin Console{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js CDN for Analytics Charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .admin-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    .form-section {
+        margin-top: 40px;
+        border-top: 1px solid rgba(255,255,255,0.06);
+        padding-top: 30px;
+    }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        text-align: left;
+    }
+
+    .admin-table th, .admin-table td {
+        padding: 12px 15px;
+        font-size: 0.85rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .admin-table th {
+        color: var(--primary-cyan);
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .analytics-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 2.3rem; color: var(--primary-cyan);"><i class="fa-solid fa-user-shield"></i> ADMIN MANAGEMENT CONSOLE</h1>
+        <p style="color: var(--text-muted);">Manage simulation databases, review analytics, and deploy dynamic mission files.</p>
+    </div>
+
+    <!-- Stats Panel -->
+    <div class="admin-grid">
+        <div class="glass-card" style="text-align: center;">
+            <div style="font-size: 2rem; color: var(--primary-cyan);"><i class="fa-solid fa-users"></i></div>
+            <h4 style="margin: 10px 0 5px 0; font-size: 1.8rem;">{{ stats.total_users }}</h4>
+            <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Total Users</span>
+        </div>
+        <div class="glass-card" style="text-align: center;">
+            <div style="font-size: 2rem; color: var(--color-safe);"><i class="fa-solid fa-signal"></i></div>
+            <h4 style="margin: 10px 0 5px 0; font-size: 1.8rem;">{{ stats.active_users }}</h4>
+            <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Active Users</span>
+        </div>
+        <div class="glass-card" style="text-align: center;">
+            <div style="font-size: 2rem; color: var(--secondary-blue);"><i class="fa-solid fa-circle-play"></i></div>
+            <h4 style="margin: 10px 0 5px 0; font-size: 1.8rem;">{{ stats.missions_played }}</h4>
+            <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Missions Played</span>
+        </div>
+        <div class="glass-card" style="text-align: center;">
+            <div style="font-size: 2rem; color: var(--color-caution);"><i class="fa-solid fa-brain"></i></div>
+            <h4 style="margin: 10px 0 5px 0; font-size: 1.8rem;">{{ stats.avg_ocean_iq }}%</h4>
+            <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Avg Ocean IQ</span>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="analytics-grid">
+        <div class="glass-card" style="min-height: 320px;">
+            <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-chart-pie" style="color: var(--primary-cyan);"></i> Active Role Distribution</h3>
+            <div style="height: 220px; display: flex; justify-content: center;">
+                <canvas id="rolesChart"></canvas>
+            </div>
+        </div>
+
+        <div class="glass-card" style="min-height: 320px;">
+            <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-chart-column" style="color: var(--secondary-blue);"></i> Decisions Completion Rate</h3>
+            <div style="height: 220px; display: flex; justify-content: center;">
+                <canvas id="decisionsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Missions CRUD Manager -->
+    <div class="glass-card form-section">
+        <h3><i class="fa-solid fa-gears" style="color: var(--primary-cyan);"></i> MISSION MANAGER</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Review active missions inside the SQLite DB. You can add new simulation scenarios using the form below.</p>
+        
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Role</th>
+                        <th>Diff</th>
+                        <th>Reward Points/XP</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mission in missions %}
+                        <tr>
+                            <td>{{ mission.id }}</td>
+                            <td><strong>{{ mission.title }}</strong></td>
+                            <td style="text-transform: uppercase; font-size: 0.75rem;">{{ mission.role }}</td>
+                            <td>{{ mission.difficulty }}</td>
+                            <td>{{ mission.points_reward }} pts / {{ mission.xp_reward }} XP</td>
+                            <td>
+                                <a href="{{ url_for('delete_mission', id=mission.id) }}" onclick="return confirm('Delete mission {{ mission.id }}?')" style="color: var(--color-danger); text-decoration: none; font-weight: bold;">
+                                    <i class="fa-solid fa-trash-can"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Add Mission Form -->
+        <h4 style="margin-top: 30px; margin-bottom: 15px; color: var(--secondary-blue);">Create New Mission Scenario</h4>
+        <form action="{{ url_for('add_mission') }}" method="POST">
+            <div class="grid-3" style="gap: 15px;">
+                <div class="form-group">
+                    <label>Mission Title</label>
+                    <input type="text" name="title" class="form-control" placeholder="e.g. Cyclone Rescue Task" required>
+                </div>
+                <div class="form-group">
+                    <label>Target Role</label>
+                    <select name="role" class="form-control" required>
+                        <option value="fisherman">Fisherman</option>
+                        <option value="captain">Ship Captain</option>
+                        <option value="tourism">Tourism Operator</option>
+                        <option value="explorer">Ocean Explorer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Difficulty</label>
+                    <select name="difficulty" class="form-control" required>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label>Scenario Description</label>
+                <textarea name="description" class="form-control" rows="3" placeholder="Explain the dynamic situation and weather warning parameters..." required></textarea>
+            </div>
+
+            <!-- Ocean Parameters Input -->
+            <div class="grid-3" style="gap: 15px; margin-top: 15px;">
+                <div class="form-group">
+                    <label>Wave Height (m)</label>
+                    <input type="number" step="0.1" name="wave_height" class="form-control" value="1.5" required>
+                </div>
+                <div class="form-group">
+                    <label>Wind Speed (km/h)</label>
+                    <input type="number" name="wind_speed" class="form-control" value="20" required>
+                </div>
+                <div class="form-group">
+                    <label>Sea Temp (SST °C)</label>
+                    <input type="number" step="0.1" name="sst" class="form-control" value="28.0" required>
+                </div>
+            </div>
+            
+            <div class="grid-3" style="gap: 15px; margin-top: 15px;">
+                <div class="form-group">
+                    <label>Fishing Zone Status</label>
+                    <select name="fish_zone" class="form-control">
+                        <option value="HIGH">HIGH</option>
+                        <option value="MODERATE">MODERATE</option>
+                        <option value="LOW">LOW</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Active Alert Banner</label>
+                    <input type="text" name="alert" class="form-control" value="NONE" placeholder="e.g. HIGH WAVE WARNING">
+                </div>
+            </div>
+
+            <!-- Options Input -->
+            <div class="grid-2" style="gap: 15px; margin-top: 20px;">
+                <div class="form-group">
+                    <label>Option A</label>
+                    <input type="text" name="option_a" class="form-control" placeholder="Action A" required>
+                </div>
+                <div class="form-group">
+                    <label>Option B</label>
+                    <input type="text" name="option_b" class="form-control" placeholder="Action B (Recommended default)" required>
+                </div>
+                <div class="form-group">
+                    <label>Option C</label>
+                    <input type="text" name="option_c" class="form-control" placeholder="Action C">
+                </div>
+                <div class="form-group">
+                    <label>Option D</label>
+                    <input type="text" name="option_d" class="form-control" placeholder="Action D">
+                </div>
+            </div>
+
+            <div class="grid-3" style="gap: 15px; margin-top: 15px; align-items: flex-end;">
+                <div class="form-group">
+                    <label>Correct Answer Letter</label>
+                    <select name="correct_answer" class="form-control" required>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Points Reward</label>
+                    <input type="number" name="points_reward" class="form-control" value="100" required>
+                </div>
+                <div class="form-group">
+                    <label>XP Reward</label>
+                    <input type="number" name="xp_reward" class="form-control" value="50" required>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label>Scientific / Regulatory Explanation</label>
+                <textarea name="explanation" class="form-control" rows="3" placeholder="Provide educational reasoning as to why the selected action is correct..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-glow" style="margin-top: 20px; width: 100%;">
+                <i class="fa-solid fa-plus-circle"></i> DEPLOY SCENARIO TO DATABASE
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 1. Roles Chart
+    const rolesCtx = document.getElementById('rolesChart').getContext('2d');
+    new Chart(rolesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Fisherman', 'Ship Captain', 'Tourism', 'Explorer'],
+            datasets: [{
+                data: [{{ stats.role_fisherman }}, {{ stats.role_captain }}, {{ stats.role_tourism }}, {{ stats.role_explorer }}],
+                backgroundColor: [
+                    'rgba(46, 196, 182, 0.65)',
+                    'rgba(0, 180, 216, 0.65)',
+                    'rgba(255, 183, 3, 0.65)',
+                    'rgba(0, 245, 212, 0.65)'
+                ],
+                borderColor: [
+                    '#2EC4B6',
+                    '#00B4D8',
+                    '#FFB703',
+                    '#00F5D4'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#F8F9FA' }
+                }
+            }
+        }
+    });
+
+    // 2. Decisions Completion Chart
+    const decisionsCtx = document.getElementById('decisionsChart').getContext('2d');
+    new Chart(decisionsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Correct', 'Incorrect'],
+            datasets: [{
+                label: 'Decisions Count',
+                data: [{{ stats.correct_decisions }}, {{ stats.failed_decisions }}],
+                backgroundColor: [
+                    'rgba(46, 196, 182, 0.5)',
+                    'rgba(255, 77, 77, 0.5)'
+                ],
+                borderColor: [
+                    '#2EC4B6',
+                    '#FF4D4D'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    ticks: { color: '#F8F9FA' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#F8F9FA' }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>
+{% endblock %}

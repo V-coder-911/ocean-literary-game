@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}OceanQuest - Achievements & Credentials{% endblock %}
+
+{% block extra_head %}
+<style>
+    .achievement-card {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 24px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .badge-icon-box {
+        font-size: 2.8rem;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+
+    /* Unlocked State */
+    .achievement-card.unlocked {
+        border-color: var(--primary-cyan);
+        background: radial-gradient(circle at top left, rgba(0, 245, 212, 0.08) 0%, rgba(10, 34, 64, 0.45) 100%);
+        box-shadow: 0 5px 25px rgba(0, 245, 212, 0.1);
+    }
+
+    .achievement-card.unlocked .badge-icon-box {
+        color: var(--primary-cyan);
+        background: rgba(0, 245, 212, 0.1);
+        border: 2px solid rgba(0, 245, 212, 0.3);
+        box-shadow: 0 0 15px rgba(0, 245, 212, 0.3);
+    }
+
+    /* Locked State */
+    .achievement-card.locked {
+        filter: grayscale(100%);
+        opacity: 0.55;
+        border-color: rgba(255,255,255,0.05);
+    }
+
+    .achievement-card.locked .badge-icon-box {
+        color: var(--text-muted);
+        background: rgba(255,255,255,0.02);
+        border: 2px dashed rgba(255,255,255,0.1);
+    }
+
+    .unlock-indicator {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .indicator-unlocked {
+        color: var(--color-safe);
+    }
+
+    .indicator-locked {
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 2.3rem; color: var(--primary-cyan);"><i class="fa-solid fa-trophy"></i> PLAYER ACHIEVEMENTS</h1>
+        <p style="color: var(--text-muted); max-width: 600px; margin: 5px auto 0 auto;">Review unlocked qualifications and maritime credentials earned throughout simulations.</p>
+    </div>
+
+    <!-- Achievements Grid -->
+    <div class="grid-2">
+        
+        {% for ach in achievements %}
+            {% set unlocked = ach.id in unlocked_achievement_ids %}
+            <div class="glass-card achievement-card {% if unlocked %}unlocked{% else %}locked{% endif %}">
+                
+                <span class="unlock-indicator {% if unlocked %}indicator-unlocked{% else %}indicator-locked{% endif %}">
+                    {% if unlocked %}
+                        <i class="fa-solid fa-circle-check"></i> Unlocked
+                    {% else %}
+                        <i class="fa-solid fa-lock"></i> Locked
+                    {% endif %}
+                </span>
+                
+                <!-- Use a mapper or icon indicator -->
+                <div class="badge-icon-box">
+                    {% if ach.name == 'First Voyage' %}
+                        <i class="fa-solid fa-anchor"></i>
+                    {% elif ach.name == 'Wave Master' %}
+                        <i class="fa-solid fa-water"></i>
+                    {% elif ach.name == 'Smart Fisher' %}
+                        <i class="fa-solid fa-fish"></i>
+                    {% elif ach.name == 'Navigation Expert' %}
+                        <i class="fa-solid fa-compass"></i>
+                    {% elif ach.name == 'Storm Survivor' %}
+                        <i class="fa-solid fa-cloud-bolt"></i>
+                    {% elif ach.name == 'Emergency Responder' %}
+                        <i class="fa-solid fa-kit-medical"></i>
+                    {% elif ach.name == 'Ocean Protector' %}
+                        <i class="fa-solid fa-seedling"></i>
+                    {% else %}
+                        <i class="fa-solid fa-shield-halved"></i>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <h3 style="color: #FFF; font-size: 1.15rem; margin-bottom: 5px; padding-right: 60px;">{{ ach.name }}</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4;">{{ ach.description }}</p>
+                    
+                    {% if unlocked %}
+                        <p style="font-size: 0.7rem; color: var(--primary-cyan); font-weight: 600; margin-top: 8px; font-family: monospace;">
+                            UNLOCKED: {{ unlock_dates[ach.id] }}
+                        </p>
+                    {% else %}
+                        <p style="font-size: 0.7rem; color: var(--color-danger); font-weight: 600; margin-top: 8px;">
+                            Requirement: {{ ach.requirement }}
+                        </p>
+                    {% endif %}
+                </div>
+
+            </div>
+        {% endfor %}
+        
+    </div>
+</div>
+{% endblock %}

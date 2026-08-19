@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}OceanQuest - Interactive Map{% endblock %}
+
+{% block extra_head %}
+<style>
+    .map-page-layout {
+        display: flex;
+        gap: 20px;
+        min-height: 75vh;
+        margin-top: 20px;
+    }
+
+    #map {
+        flex: 2;
+        height: 650px;
+        border-radius: 16px;
+        border: 1px solid var(--border-glow);
+        box-shadow: 0 0 20px rgba(0, 245, 212, 0.1);
+        z-index: 10;
+    }
+
+    .advisory-sidebar {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 24px;
+        min-width: 320px;
+    }
+
+    .advisor-stat {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .advisor-stat strong {
+        color: var(--text-light);
+    }
+    
+    .advisor-stat span {
+        color: var(--primary-cyan);
+        font-weight: 600;
+    }
+
+    .marker-legend {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+        font-size: 0.8rem;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--text-muted);
+    }
+
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    @media (max-width: 991px) {
+        .map-page-layout {
+            flex-direction: column;
+        }
+        #map {
+            height: 400px;
+        }
+        .advisory-sidebar {
+            min-width: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="text-align: center; margin-bottom: 10px;">
+        <h1 style="font-size: 2.2rem; color: var(--primary-cyan);"><i class="fa-solid fa-earth-asia"></i> INTERACTIVE OCEAN ADVISORY MAP</h1>
+        <p style="color: var(--text-muted);">Explore simulated coastal and offshore zones. Click on markers to load real-time advisory profiles.</p>
+    </div>
+
+    <!-- Map Legend -->
+    <div class="marker-legend glass-card" style="padding: 10px 20px; border-radius: 10px; justify-content: center;">
+        <div class="legend-item"><span class="dot" style="background: var(--color-safe);"></span> Safe Zone</div>
+        <div class="legend-item"><span class="dot" style="background: var(--color-caution);"></span> Caution Zone</div>
+        <div class="legend-item"><span class="dot" style="background: var(--color-danger);"></span> Danger Zone</div>
+        <div class="legend-item"><i class="fa-solid fa-fish" style="color: var(--primary-cyan);"></i> Potential Fishing Zone (PFZ)</div>
+        <div class="legend-item"><i class="fa-solid fa-triangle-exclamation" style="color: var(--color-warning);"></i> Warning / Alert</div>
+    </div>
+
+    <!-- Main Map/Sidebar Layout -->
+    <div class="map-page-layout">
+        
+        <!-- Leaflet Map Container -->
+        <div id="map"></div>
+        
+        <!-- Advisory Sidebar -->
+        <div class="glass-card advisory-sidebar" id="sidebar-panel">
+            <div id="sidebar-content-default" style="text-align: center; margin: auto 0;">
+                <i class="fa-solid fa-location-crosshairs" style="font-size: 3rem; color: var(--secondary-blue); margin-bottom: 15px;"></i>
+                <h4>SELECT A LOCATOR</h4>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 8px;">Click any beacon marker on the map to query the simulated ocean database.</p>
+            </div>
+            
+            <div id="sidebar-content-active" style="display: none;">
+                <h3 id="zone-title" style="color: var(--primary-cyan); margin-bottom: 15px; border-bottom: 1px solid rgba(0, 245, 212, 0.2); padding-bottom: 10px;">Arabian Sea - Zone A</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <span id="zone-status-badge" class="badge-status status-safe">SAFE</span>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 2px; margin-bottom: 25px;">
+                    <div class="advisor-stat">
+                        <strong>Wave Height:</strong>
+                        <span id="stat-wave">1.2 m</span>
+                    </div>
+                    <div class="advisor-stat">
+                        <strong>Wave Direction:</strong>
+                        <span id="stat-wave-dir">SSW</span>
+                    </div>
+                    <div class="advisor-stat">
+                        <strong>Wind Speed:</strong>
+                        <span id="stat-wind">14 km/h</span>
+                    </div>
+                    <div class="advisor-stat">
+                        <strong>Wind Direction:</strong>
+                        <span id="stat-wind-dir">SW</span>
+                    </div>
+                    <div class="advisor-stat">
+                        <strong>Sea Temp (SST):</strong>
+                        <span id="stat-sst">28.4 °C</span>
+                    </div>
+                    <div class="advisor-stat">
+                        <strong>Fish Potential (PFZ):</strong>
+                        <span id="stat-pfz">HIGH</span>
+                    </div>
+                    <div class="advisor-stat">
+                        <strong>Current Advisory:</strong>
+                        <span id="stat-alert">None</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px;"><i class="fa-solid fa-circle-info"></i> Decided to sail here? Hit Select Zone to initialize simulation scenarios in this sector.</p>
+                    <button class="btn-glow" style="width: 100%;" onclick="startZoneMission()">
+                        SELECT THIS ZONE <i class="fa-solid fa-circle-play"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize map focused on Indian shoreline
+    const map = L.map('map').setView([12.5, 76.5], 5);
+    
+    // Add custom dark-themed map layer (CartoDB Dark Matter)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+    }).addTo(map);
+
+    // Mock Location Data
+    const zones = {
+        mumbai: {
+            name: "Mumbai Coastal Zone",
+            lat: 18.95,
+            lon: 72.75,
+            status: "caution",
+            wave: "2.1 m",
+            wave_dir: "WNW",
+            wind: "28 km/h",
+            wind_dir: "NW",
+            sst: "29.1 °C",
+            pfz: "MODERATE",
+            alert: "High Waves near shoreline",
+            color: "yellow"
+        },
+        kerala: {
+            name: "Kerala Fisheries Sector B",
+            lat: 9.80,
+            lon: 75.90,
+            status: "safe",
+            wave: "1.2 m",
+            wave_dir: "SSW",
+            wind: "14 km/h",
+            wind_dir: "SW",
+            sst: "28.3 °C",
+            pfz: "HIGH POTENTIAL",
+            alert: "No Active Alerts",
+            color: "green"
+        },
+        tamilnadu: {
+            name: "Tamil Nadu Coast (Palk Strait)",
+            lat: 10.50,
+            lon: 79.90,
+            status: "danger",
+            wave: "3.6 m",
+            wave_dir: "E",
+            wind: "48 km/h",
+            wind_dir: "ENE",
+            sst: "27.8 °C",
+            pfz: "LOW POTENTIAL",
+            alert: "Storm Surge warning in effect",
+            color: "red"
+        },
+        srilanka: {
+            name: "Sri Lanka Offshore Zone C",
+            lat: 6.70,
+            lon: 80.80,
+            status: "safe",
+            wave: "1.5 m",
+            wave_dir: "S",
+            wind: "18 km/h",
+            wind_dir: "SSE",
+            sst: "28.5 °C",
+            pfz: "HIGH POTENTIAL",
+            alert: "No Active Alerts",
+            color: "green"
+        },
+        arabian: {
+            name: "Arabian Sea Central Basin",
+            lat: 15.0,
+            lon: 67.5,
+            status: "safe",
+            wave: "1.8 m",
+            wave_dir: "WSW",
+            wind: "22 km/h",
+            wind_dir: "WSW",
+            sst: "28.9 °C",
+            pfz: "MODERATE",
+            alert: "None",
+            color: "green"
+        },
+        bengal: {
+            name: "Bay of Bengal Deep Water",
+            lat: 14.5,
+            lon: 86.5,
+            status: "danger",
+            wave: "4.8 m",
+            wave_dir: "NE",
+            wind: "62 km/h",
+            wind_dir: "ENE",
+            sst: "26.5 °C",
+            pfz: "LOW POTENTIAL",
+            alert: "Cyclone Warning: Avoid Transit",
+            color: "red"
+        }
+    };
+
+    let selectedZoneKey = '';
+
+    // Draw markers on map
+    for (let key in zones) {
+        const zone = zones[key];
+        
+        // Setup marker color
+        let markerColor = '#2EC4B6'; // green
+        if (zone.status === 'caution') markerColor = '#FFB703'; // yellow
+        if (zone.status === 'danger') markerColor = '#FF4D4D'; // red
+        
+        // Simple circle marker
+        const marker = L.circleMarker([zone.lat, zone.lon], {
+            radius: 12,
+            fillColor: markerColor,
+            color: '#FFFFFF',
+            weight: 2,
+            opacity: 0.8,
+            fillOpacity: 0.7
+        }).addTo(map);
+
+        // Click interaction
+        marker.on('click', function() {
+            selectedZoneKey = key;
+            
+            // Switch sidebar content
+            document.getElementById('sidebar-content-default').style.display = 'none';
+            document.getElementById('sidebar-content-active').style.display = 'flex';
+            document.getElementById('sidebar-content-active').style.flexDirection = 'column';
+            
+            // Fill sidebar values
+            document.getElementById('zone-title').innerText = zone.name;
+            
+            const badge = document.getElementById('zone-status-badge');
+            badge.innerText = zone.status.toUpperCase();
+            badge.className = 'badge-status'; // reset
+            if (zone.status === 'safe') badge.classList.add('status-safe');
+            if (zone.status === 'caution') badge.classList.add('status-caution');
+            if (zone.status === 'danger') badge.classList.add('status-danger');
+            
+            document.getElementById('stat-wave').innerText = zone.wave;
+            document.getElementById('stat-wave-dir').innerText = zone.wave_dir;
+            document.getElementById('stat-wind').innerText = zone.wind;
+            document.getElementById('stat-wind-dir').innerText = zone.wind_dir;
+            document.getElementById('stat-sst').innerText = zone.sst;
+            document.getElementById('stat-pfz').innerText = zone.pfz;
+            document.getElementById('stat-alert').innerText = zone.alert;
+        });
+        
+        // Tooltip
+        marker.bindTooltip(zone.name, { direction: 'top', offset: [0, -5] });
+    }
+
+    function startZoneMission() {
+        if (!selectedZoneKey) return;
+        alert(`Initializing simulation sequence in: ${zones[selectedZoneKey].name}. Proceeding to missions!`);
+        window.location.href = `/roles`;
+    }
+</script>
+{% endblock %}

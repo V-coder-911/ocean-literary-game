@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block title %}OceanQuest - Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Stats Grid */
+    .dashboard-header {
+        margin-bottom: 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        border-bottom: 1px solid rgba(0, 245, 212, 0.15);
+        padding-bottom: 20px;
+    }
+    
+    .role-badge-display {
+        background: rgba(0, 180, 216, 0.2);
+        border: 1px solid var(--secondary-blue);
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        color: var(--secondary-blue);
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .stat-card {
+        text-align: center;
+        padding: 20px 15px;
+    }
+
+    .stat-val {
+        font-size: 2.2rem;
+        font-family: var(--font-heading);
+        font-weight: 700;
+        color: var(--primary-cyan);
+        margin: 10px 0 5px 0;
+        text-shadow: 0 0 10px rgba(0, 245, 212, 0.3);
+    }
+
+    .stat-label {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 500;
+    }
+
+    /* XP Progress Circle CSS */
+    .xp-circle-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        height: 100%;
+    }
+
+    .xp-svg-box {
+        position: relative;
+        width: 180px;
+        height: 180px;
+    }
+
+    .xp-svg-circle {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+    }
+
+    .xp-circle-bg {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.05);
+        stroke-width: 12;
+    }
+
+    .xp-circle-progress {
+        fill: none;
+        stroke: url(#cyan-blue-grad);
+        stroke-width: 12;
+        stroke-linecap: round;
+        stroke-dasharray: 502; /* 2 * PI * r (r=80) */
+        stroke-dashoffset: calc(502 - (502 * {{ xp_pct }}) / 100);
+        transition: stroke-dashoffset 1s ease-out;
+    }
+
+    .xp-circle-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+
+    .xp-level-num {
+        font-size: 2rem;
+        font-weight: 800;
+        font-family: var(--font-heading);
+        color: #FFF;
+    }
+
+    .xp-level-title {
+        font-size: 0.75rem;
+        color: var(--primary-cyan);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+    }
+
+    .xp-raw-values {
+        margin-top: 15px;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    /* Mission Box */
+    .mission-cta-box {
+        background: linear-gradient(135deg, rgba(10, 34, 64, 0.7) 0%, rgba(3, 10, 22, 0.8) 100%);
+        border: 2px solid var(--primary-cyan);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 30px;
+        border-radius: 16px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+        gap: 20px;
+        box-shadow: 0 0 25px rgba(0, 245, 212, 0.15);
+    }
+
+    /* Streak & Challenges styling */
+    .streak-alert {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 20px;
+        background: rgba(255, 183, 3, 0.1);
+        border: 1px solid var(--color-caution);
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
+
+    .streak-fire-icon {
+        font-size: 2rem;
+        color: var(--color-caution);
+        animation: flicker 1s infinite alternate;
+    }
+
+    @keyframes flicker {
+        0% { transform: scale(0.95); filter: drop-shadow(0 0 2px rgba(255,183,3,0.5)); }
+        100% { transform: scale(1.05); filter: drop-shadow(0 0 10px rgba(255,183,3,0.8)); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <!-- Welcome Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1 style="font-size: 2.2rem; margin-bottom: 5px;">Welcome back, <span style="color: var(--primary-cyan);">{{ user.name }}</span>!</h1>
+            <p style="color: var(--text-muted);">Role: <strong>{% if user.selected_role %}{{ user.selected_role|capitalize }}{% else %}Not Selected{% endif %}</strong> | Grade: Ocean Guardian</p>
+        </div>
+        <div>
+            {% if user.selected_role %}
+                <span class="role-badge-display">
+                    {% if user.selected_role == 'fisherman' %}
+                        <i class="fa-solid fa-fish"></i> Fisherman
+                    {% elif user.selected_role == 'captain' %}
+                        <i class="fa-solid fa-ship"></i> Ship Captain
+                    {% elif user.selected_role == 'tourism' %}
+                        <i class="fa-solid fa-umbrella-beach"></i> Tourism Operator
+                    {% else %}
+                        <i class="fa-solid fa-compass"></i> Ocean Explorer
+                    {% endif %}
+                </span>
+            {% else %}
+                <a href="{{ url_for('roles') }}" class="btn-glow" style="padding: 8px 16px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-user-astronaut"></i> CHOOSE ROLE
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Streak Alert if active -->
+    {% if user.streak > 0 %}
+        <div class="streak-alert">
+            <div class="streak-fire-icon"><i class="fa-solid fa-fire"></i></div>
+            <div>
+                <h4 style="color: var(--color-caution);">{{ user.streak }} MISSION STREAK ACTIVE!</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Keep solving missions correctly to build your multiplier and unlock bonus points.</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Core Stats and XP Progress Row -->
+    <div class="grid-3" style="margin-bottom: 40px;">
+        
+        <!-- Stats summary -->
+        <div class="glass-card" style="grid-column: span 2; display: flex; flex-direction: column; justify-content: space-between;">
+            <h3 style="margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
+                <i class="fa-solid fa-gauge-high" style="color: var(--primary-cyan);"></i> Player Statistics
+            </h3>
+            
+            <div class="grid-3">
+                <div class="stat-card">
+                    <div class="stat-val" style="color: var(--primary-cyan);">{{ user.points }}</div>
+                    <div class="stat-label">Total Points</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" style="color: var(--secondary-blue);">{{ user.xp }}</div>
+                    <div class="stat-label">Total XP</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" style="color: var(--color-safe);">{{ completed_count }}</div>
+                    <div class="stat-label">Missions Solved</div>
+                </div>
+            </div>
+            
+            <div class="grid-3" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                <div class="stat-card">
+                    <div class="stat-val" style="font-size: 1.8rem; color: #FFF;">{{ user.ocean_iq }}%</div>
+                    <div class="stat-label">Ocean IQ Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" style="font-size: 1.8rem; color: var(--color-caution);">{{ user.streak }}</div>
+                    <div class="stat-label">Current Streak</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" style="font-size: 1.8rem; color: var(--color-safe);">#{{ rank if rank else 'N/A' }}</div>
+                    <div class="stat-label">Global Rank</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Circular XP indicator -->
+        <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <h3 style="align-self: flex-start; margin-bottom: 10px;"><i class="fa-solid fa-spinner" style="color: var(--secondary-blue);"></i> Level Progress</h3>
+            
+            <div class="xp-circle-container">
+                <div class="xp-svg-box">
+                    <svg class="xp-svg-circle">
+                        <defs>
+                            <linearGradient id="cyan-blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00B4D8" />
+                                <stop offset="100%" stop-color="#00F5D4" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="xp-circle-bg" cx="90" cy="90" r="80"></circle>
+                        <circle class="xp-circle-progress" cx="90" cy="90" r="80"></circle>
+                    </svg>
+                    <div class="xp-circle-text">
+                        <div class="xp-level-num">{{ "%02d"|format(user.level) }}</div>
+                        <div class="xp-level-title">{{ level_name }}</div>
+                    </div>
+                </div>
+                <div class="xp-raw-values">
+                    <strong>{{ xp_current }}</strong> / {{ xp_needed }} XP ({{ xp_pct }}%)
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Active Mission Trigger -->
+    <div class="mission-cta-box">
+        <div>
+            <h2 style="font-size: 1.8rem; margin-bottom: 5px; color: var(--primary-cyan);">READY FOR THE NEXT SHIFT?</h2>
+            <p style="color: var(--text-muted); max-width: 600px;">
+                {% if next_mission %}
+                    Analyze simulated advisory conditions and respond to <strong>{{ next_mission.title }}</strong>.
+                {% else %}
+                    You have solved all standard simulation scripts! Go to the Quiz, explore the map, or re-run missions in Admin mode.
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            {% if next_mission %}
+                <a href="{{ url_for('mission', mission_id=next_mission.id) }}" class="btn-glow" style="padding: 16px 36px; font-size: 1.1rem; border-radius: 12px;">
+                    CONTINUE MISSION <i class="fa-solid fa-circle-arrow-right"></i>
+                </a>
+            {% else %}
+                <a href="{{ url_for('roles') }}" class="btn-glow" style="padding: 16px 36px; font-size: 1.1rem; border-radius: 12px;">
+                    PLAY MISSION <i class="fa-solid fa-gamepad"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Challenges & Achievements Row -->
+    <div class="grid-2">
+        
+        <!-- Daily & Weekly Challenge Panel -->
+        <div class="glass-card" style="display: flex; flex-direction: column; gap: 20px;">
+            <h3><i class="fa-solid fa-calendar-check" style="color: var(--color-caution);"></i> Active Challenges</h3>
+            
+            <!-- Daily -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(0, 245, 212, 0.1); padding: 15px; border-radius: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <strong style="color: var(--primary-cyan); font-size: 0.95rem;">🌊 DAILY OCEAN CHALLENGE</strong>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;" id="daily-timer">Calculating...</span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">High-wave emergency near Mumbai coastline. Evacuate or anchor vessels safely?</p>
+                <a href="{{ url_for('daily_challenge') }}" class="btn-secondary" style="padding: 6px 12px; font-size: 0.75rem;">
+                    PLAY CHALLENGE (+250 XP)
+                </a>
+            </div>
+
+            <!-- Weekly -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(0, 180, 216, 0.1); padding: 15px; border-radius: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <strong style="color: var(--secondary-blue); font-size: 0.95rem;">🏆 WEEKLY KNOWLEDGE MARATHON</strong>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">4 DAYS LEFT</span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Achieve an Ocean IQ of 85% or higher on the Experts level quiz to unlock a limited stamp.</p>
+                <a href="{{ url_for('quiz') }}" class="btn-secondary" style="padding: 6px 12px; font-size: 0.75rem; border-color: var(--secondary-blue); color: var(--secondary-blue) !important;">
+                    TAKE QUIZ
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Achievements unlocked -->
+        <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3><i class="fa-solid fa-award" style="color: var(--primary-cyan);"></i> Achievements & Badges</h3>
+                    <a href="{{ url_for('achievements') }}" style="font-size: 0.85rem; color: var(--primary-cyan); text-decoration: none;">View All ({{ user_achievements|length }}/8)</a>
+                </div>
+                
+                {% if user_achievements %}
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        {% for ua in user_achievements[:3] %}
+                            <div style="display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.04);">
+                                <div style="font-size: 1.5rem; color: var(--primary-cyan); background: rgba(0, 245, 212, 0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 245, 212, 0.2);">
+                                    <i class="fa-solid fa-award"></i>
+                                </div>
+                                <div>
+                                    <h5 style="margin: 0; font-size: 0.9rem;">{{ ua.name }}</h5>
+                                    <p style="color: var(--text-muted); font-size: 0.75rem;">{{ ua.description }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+                        <i class="fa-solid fa-lock" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                        <p>No achievements unlocked yet. Solve missions to unlock credentials!</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div style="margin-top: 15px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Your Leaderboard Position: <strong>Rank #{{ rank if rank else 'N/A' }}</strong> out of all Guardians.</p>
+            </div>
+        </div>
+        
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simple count down timer for daily challenge
+    function updateDailyTimer() {
+        const now = new Date();
+        const tomorrow = new Date();
+        tomorrow.setHours(24, 0, 0, 0); // Next midnight
+        
+        const diffMs = tomorrow - now;
+        const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const diffSecs = Math.floor((diffMs % (1000 * 60)) / 1000);
+        
+        const pad = (num) => String(num).padStart(2, '0');
+        
+        const timerEl = document.getElementById('daily-timer');
+        if (timerEl) {
+            timerEl.innerHTML = `<i class="fa-regular fa-clock"></i> RESETS IN ${pad(diffHrs)}:${pad(diffMins)}:${pad(diffSecs)}`;
+        }
+    }
+    
+    updateDailyTimer();
+    setInterval(updateDailyTimer, 1000);
+</script>
+{% endblock %}

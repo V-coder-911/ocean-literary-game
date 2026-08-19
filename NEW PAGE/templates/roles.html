@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}OceanQuest - Choose Your Role{% endblock %}
+
+{% block extra_head %}
+<style>
+    .role-selection-grid {
+        margin-top: 40px;
+    }
+
+    .role-card {
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 480px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .role-card.selected {
+        border-color: var(--primary-cyan);
+        box-shadow: 0 0 30px rgba(0, 245, 212, 0.3);
+        transform: translateY(-8px) scale(1.02);
+    }
+    
+    .role-card.selected::after {
+        content: '\f058';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        color: var(--primary-cyan);
+        font-size: 1.5rem;
+    }
+
+    .role-illustration {
+        height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 15px 0;
+        background: rgba(255,255,255,0.02);
+        border-radius: 12px;
+        border: 1px dashed rgba(0, 180, 216, 0.15);
+        color: var(--secondary-blue);
+        font-size: 4rem;
+        transition: all 0.3s ease;
+    }
+
+    .role-card:hover .role-illustration {
+        color: var(--primary-cyan);
+        background: rgba(0, 245, 212, 0.05);
+        transform: scale(1.05);
+    }
+
+    .skill-bar-container {
+        margin: 8px 0;
+    }
+
+    .skill-bar-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .skill-bar {
+        height: 6px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .skill-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--secondary-blue), var(--primary-cyan));
+        border-radius: 3px;
+    }
+    
+    .diff-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    
+    .diff-easy { background: rgba(46, 196, 182, 0.15); color: var(--color-safe); border: 1px solid var(--color-safe); }
+    .diff-medium { background: rgba(255, 183, 3, 0.15); color: var(--color-caution); border: 1px solid var(--color-caution); }
+    .diff-hard { background: rgba(255, 77, 77, 0.15); color: var(--color-danger); border: 1px solid var(--color-danger); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="text-align: center;">
+    <h1 style="font-size: 2.5rem; margin-bottom: 10px; color: var(--primary-cyan);">CHOOSE YOUR ROLE</h1>
+    <p style="color: var(--text-muted); max-width: 650px; margin: 0 auto 30px auto;">Each role faces unique challenges. Choose your domain of expertise to begin simulation tasks and help secure the ocean.</p>
+    
+    <div class="grid-4 role-selection-grid">
+        
+        <!-- Fisherman -->
+        <div class="glass-card role-card {% if current_role == 'fisherman' %}selected{% endif %}" onclick="selectRole('fisherman')">
+            <span class="diff-badge diff-easy">Easy</span>
+            <div style="padding-top: 15px;">
+                <div class="role-illustration">
+                    <i class="fa-solid fa-fish"></i>
+                </div>
+                <h3 style="margin-bottom: 8px;">Fisherman</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">Find productive fishing zones while staying alert to changing sea conditions.</p>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <div class="skill-bar-container">
+                    <div class="skill-bar-label"><span>Fishing Knowledge</span><span>85%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width: 85%;"></div></div>
+                </div>
+                <div class="skill-bar-container">
+                    <div class="skill-bar-label"><span>Safety Awareness</span><span>55%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width: 55%;"></div></div>
+                </div>
+                <div class="skill-bar-container">
+                    <div class="skill-bar-label"><span>Navigation</span><span>65%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width: 65%;"></div></div>
+                </div>
+                
+                <a href="{{ url_for('select_role', role='fisherman') }}" class="btn-glow" style="width: 100%; margin-top: 20px; font-size: 0.85rem; padding: 10px 0;">
+                    SELECT ROLE
+                </a>
+            </div>
+        </div>
+
+        <!-- Ship Captain -->
+        <div class="glass-card role-card {% if current_role == 'captain' %}selected{% endif %}" onclick="selectRole('captain')">
+            <span class="diff-badge diff-hard">Hard</span>
+            <div style="padding-top: 15px;">
+                <div class="role-illustration">
+                    <i class="fa-solid fa-ship"></i>
+                </div>
+                <h3 style="margin-bottom: 8px;">Ship Captain</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">Navigate cargo vessels safely through changing weather and deep sea hazards.</p>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <div class="skill-bar-container">
+                    <div class="skill-bar-label"><span>Navigation</span><span>90%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width: 90%;"></div></div>
+                </div>
+                <div class="skill-bar-container">
+                    <div class="skill-bar-label"><span>Safety Systems</span><span>80%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width: 80%;"></div></div>
+                </div>
+                <div class="skill-bar-container">
+                    <div class="skill-bar-label"><span>Decision Making</span><span>85%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width: 85%;"></div></div>
+                </div>
+                
+                <a href="{{ url_for('select_role', role='captain') }}" class="btn-glow" style="width: 100%; margin-top: 20px; font-size: 0.85rem; padding: 10px 0;">
+                    SELECT ROLE
+                </a>
+            </div>
+        </div>
+
+        <!-- Tourism Operator -->
+        <div class="glass-card role-card {% if current_role == 'tourism' %}selected{% endif %}" onclick="selectRole('tourism')">
+            <span class="diff-badge diff-medium">Medium</span>
+            <div style="padding-top: 15px;">
+                <div class="role-illustration">
+                    <i class="fa-solid fa-umbrella-beach"></i>
+                </div>
+                <h3 style="margin-bottom: 8px;">Tourism Operator</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">Manage coastal cruises and beach activities. Keep tourists safe from sudden surges.</p>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <div class="skill-bar-container">
+                    <div class="skill-bar-label"><span>Public Safety</span><span>85%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width: 85%;"></div></div>
+                </div>
+                <div class="skill-bar-container">
+                    <div class="skill-bar-label"><span>Weather Awareness</span><span>75%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width: 75%;"></div></div>
+                </div>
+                <div class="skill-bar-container">
+                    <div class="skill-bar-label"><span>Eco-Knowledge</span><span>70%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width: 70%;"></div></div>
+                </div>
+                
+                <a href="{{ url_for('select_role', role='tourism') }}" class="btn-glow" style="width: 100%; margin-top: 20px; font-size: 0.85rem; padding: 10px 0;">
+                    SELECT ROLE
+                </a>
+            </div>
+        </div>
+
+        <!-- Ocean Explorer -->
+        <div class="glass-card role-card {% if current_role == 'explorer' %}selected{% endif %}" onclick="selectRole('explorer')">
+            <span class="diff-badge diff-medium">Medium</span>
+            <div style="padding-top: 15px;">
+                <div class="role-illustration">
+                    <i class="fa-solid fa-compass"></i>
+                </div>
+                <h3 style="margin-bottom: 8px;">Ocean Explorer</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">Explore underwater marine biology, coral reefs, and study sea temperature patterns.</p>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <div class="skill-bar-container">
+                    <div class="skill-bar-label"><span>Ocean Science</span><span>90%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width: 90%;"></div></div>
+                </div>
+                <div class="skill-bar-container">
+                    <div class="skill-bar-label"><span>Marine Ecology</span><span>85%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width: 85%;"></div></div>
+                </div>
+                <div class="skill-bar-container">
+                    <div class="skill-bar-label"><span>Sustainability</span><span>80%</span></div>
+                    <div class="skill-bar"><div class="skill-fill" style="width: 80%;"></div></div>
+                </div>
+                
+                <a href="{{ url_for('select_role', role='explorer') }}" class="btn-glow" style="width: 100%; margin-top: 20px; font-size: 0.85rem; padding: 10px 0;">
+                    SELECT ROLE
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function selectRole(roleName) {
+        // Remove 'selected' class from all cards
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Find clicked card and add 'selected'
+        const cards = document.querySelectorAll('.role-card');
+        let targetIndex = 0;
+        if (roleName === 'fisherman') targetIndex = 0;
+        if (roleName === 'captain') targetIndex = 1;
+        if (roleName === 'tourism') targetIndex = 2;
+        if (roleName === 'explorer') targetIndex = 3;
+        
+        cards[targetIndex].classList.add('selected');
+        
+        // Redirect to selection endpoint
+        window.location.href = `/select-role/${roleName}`;
+    }
+</script>
+{% endblock %}

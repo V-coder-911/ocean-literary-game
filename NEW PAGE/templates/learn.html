@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}OceanQuest - Learn Ocean Science{% endblock %}
+
+{% block extra_head %}
+<style>
+    .learn-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 30px;
+        margin-top: 20px;
+    }
+
+    .learn-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .learn-nav-btn {
+        background: rgba(10, 34, 64, 0.35);
+        border: 1px solid rgba(0, 180, 216, 0.15);
+        color: var(--text-light);
+        padding: 15px 20px;
+        border-radius: 12px;
+        cursor: pointer;
+        text-align: left;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .learn-nav-btn:hover, .learn-nav-btn.active {
+        background: rgba(0, 245, 212, 0.1);
+        border-color: var(--primary-cyan);
+        color: var(--primary-cyan);
+        transform: translateX(4px);
+    }
+    
+    .learn-nav-btn i {
+        font-size: 1.2rem;
+        width: 24px;
+        text-align: center;
+    }
+
+    .learn-content-card {
+        padding: 30px;
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .module-quiz-box {
+        margin-top: 30px;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        border: 1px dashed rgba(0, 245, 212, 0.2);
+    }
+
+    .quiz-question {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .quiz-options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .quiz-label {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.05);
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .quiz-label:hover {
+        background: rgba(0, 180, 216, 0.08);
+        border-color: var(--secondary-blue);
+    }
+
+    .quiz-label input {
+        accent-color: var(--primary-cyan);
+    }
+
+    @media (max-width: 768px) {
+        .learn-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="font-size: 2.3rem; color: var(--primary-cyan);"><i class="fa-solid fa-graduation-cap"></i> OCEAN LITERACY HUB</h1>
+        <p style="color: var(--text-muted); max-width: 600px; margin: 5px auto 0 auto;">Read our short interactive modules, answer 3 quiz questions per section, and earn <strong>+50 XP</strong> per completed category.</p>
+    </div>
+
+    <div class="learn-layout">
+        
+        <!-- Left Side: Category Navigator -->
+        <div class="learn-nav">
+            {% for category in categories %}
+                <button class="learn-nav-btn {% if loop.first %}active{% endif %}" onclick="showModule('{{ category.id }}', this)">
+                    <i class="fa-solid {{ category.icon }}"></i>
+                    <span>{{ category.name }}</span>
+                </button>
+            {% endfor %}
+        </div>
+
+        <!-- Right Side: Content Container -->
+        <div class="glass-card learn-content-card">
+            {% for category in categories %}
+                <div id="module-{{ category.id }}" class="learn-module-content" style="{% if not loop.first %}display: none;{% endif %}">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 15px;">
+                        <span style="font-size: 2.2rem; color: var(--primary-cyan); background: rgba(0, 245, 212, 0.08); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid {{ category.icon }}"></i>
+                        </span>
+                        <div>
+                            <h2 style="font-size: 1.8rem; color: var(--text-light);">{{ category.name }}</h2>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; tracking-spacing: 0.05em;">Interactive Module</p>
+                        </div>
+                    </div>
+
+                    <!-- Core Scientific Explanations -->
+                    <div style="line-height: 1.7; color: var(--text-light); font-size: 1rem;" class="module-text">
+                        {{ category.explanation|safe }}
+                    </div>
+
+                    <!-- Mini Quiz Box -->
+                    <div class="module-quiz-box">
+                        <h4 style="color: var(--primary-cyan); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fa-solid fa-clipboard-question"></i> Section Review: Quick Mini-Quiz
+                        </h4>
+                        
+                        <form action="{{ url_for('submit_learn_quiz') }}" method="POST">
+                            <input type="hidden" name="category_id" value="{{ category.id }}">
+                            
+                            {% for q in category.quiz %}
+                                <div class="quiz-question">
+                                    <p style="font-weight: 600; margin-bottom: 10px;">{{ loop.index }}. {{ q.question }}</p>
+                                    <div class="quiz-options">
+                                        <label class="quiz-label">
+                                            <input type="radio" name="q{{ loop.index }}" value="A" required>
+                                            <span>{{ q.option_a }}</span>
+                                        </label>
+                                        <label class="quiz-label">
+                                            <input type="radio" name="q{{ loop.index }}" value="B">
+                                            <span>{{ q.option_b }}</span>
+                                        </label>
+                                        <label class="quiz-label">
+                                            <input type="radio" name="q{{ loop.index }}" value="C">
+                                            <span>{{ q.option_c }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            
+                            <button type="submit" class="btn-glow" style="margin-top: 15px; font-size: 0.85rem; padding: 10px 24px;">
+                                SUBMIT QUIZ FOR +50 XP <i class="fa-solid fa-circle-check"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function showModule(moduleId, buttonEl) {
+        // Hide all modules
+        document.querySelectorAll('.learn-module-content').forEach(module => {
+            module.style.display = 'none';
+        });
+        
+        // Remove active class from buttons
+        document.querySelectorAll('.learn-nav-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Show clicked module & make button active
+        document.getElementById(`module-${moduleId}`).style.display = 'block';
+        buttonEl.classList.add('active');
+    }
+</script>
+{% endblock %}

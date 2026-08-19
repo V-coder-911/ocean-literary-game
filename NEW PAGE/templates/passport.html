@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}OceanQuest - Ocean Journey Passport{% endblock %}
+
+{% block extra_head %}
+<style>
+    .passport-book {
+        background: radial-gradient(circle at center, #0F335C 0%, #061B33 100%);
+        border: 4px solid #C4A45A;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        padding: 40px;
+        position: relative;
+        max-width: 850px;
+        margin: 40px auto;
+        overflow: hidden;
+    }
+
+    /* Passport Gold Trim & Watermark */
+    .passport-book::before {
+        content: '';
+        position: absolute;
+        top: 10px; left: 10px; right: 10px; bottom: 10px;
+        border: 2px solid rgba(196, 164, 90, 0.3);
+        border-radius: 16px;
+        pointer-events: none;
+    }
+
+    .passport-header {
+        text-align: center;
+        margin-bottom: 40px;
+        border-bottom: 2px dashed rgba(196, 164, 90, 0.4);
+        padding-bottom: 20px;
+    }
+
+    .passport-header h2 {
+        font-family: var(--font-heading);
+        font-size: 2.2rem;
+        color: #C4A45A;
+        text-shadow: 0 0 10px rgba(196, 164, 90, 0.2);
+        letter-spacing: 0.1em;
+    }
+
+    .passport-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 30px;
+    }
+
+    .stamp-slot {
+        background: rgba(3, 10, 22, 0.5);
+        border: 2px dashed rgba(255,255,255,0.08);
+        border-radius: 50%;
+        width: 170px;
+        height: 170px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+        position: relative;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    /* Unlocked Passport Stamp Style */
+    .stamp-slot.unlocked {
+        background: rgba(196, 164, 90, 0.08);
+        border: 3px double #C4A45A;
+        box-shadow: 0 0 20px rgba(196, 164, 90, 0.15);
+        transform: rotate(calc(var(--rot, 0) * 1deg));
+    }
+
+    .stamp-slot.unlocked .stamp-icon {
+        color: #C4A45A;
+        font-size: 3rem;
+        filter: drop-shadow(0 0 5px rgba(196, 164, 90, 0.4));
+        animation: stamp-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    @keyframes stamp-pop {
+        0% { transform: scale(3); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .stamp-slot.locked {
+        filter: grayscale(100%);
+        opacity: 0.4;
+    }
+
+    .stamp-slot.locked .stamp-icon {
+        color: var(--text-muted);
+        font-size: 2.2rem;
+    }
+
+    .stamp-name {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-top: 8px;
+        color: #FFF;
+    }
+
+    .stamp-desc {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        margin-top: 3px;
+        line-height: 1.2;
+    }
+
+    .stamp-unlocked-date {
+        position: absolute;
+        bottom: 12px;
+        font-size: 0.55rem;
+        color: #C4A45A;
+        font-family: monospace;
+        font-weight: bold;
+    }
+
+    .stamp-lock-req {
+        font-size: 0.6rem;
+        color: var(--color-danger);
+        font-weight: 600;
+        margin-top: 5px;
+    }
+    
+    .passport-footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px dashed rgba(196, 164, 90, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <div style="text-align: center; margin-bottom: 15px;">
+        <h1 style="font-size: 2.2rem; color: var(--primary-cyan);"><i class="fa-solid fa-passport"></i> OCEAN JOURNEY PASSPORT</h1>
+        <p style="color: var(--text-muted);">As an active marine investigator, correct decisions seal your passport with official credentials.</p>
+    </div>
+
+    <!-- Passport Booklet Visual -->
+    <div class="passport-book">
+        
+        <div class="passport-header">
+            <h2>OCEAN GUARDIAN PASSPORT</h2>
+            <p style="color: #C4A45A; font-size: 0.85rem; letter-spacing: 0.05em; font-weight: 500; text-transform: uppercase; margin-top: 5px;">
+                Holder: <strong>{{ user.name }}</strong> | ID: #OQ-{{ "%05d"|format(user.id) }}
+            </p>
+        </div>
+
+        <!-- Stamp Grid -->
+        <div class="passport-grid">
+            
+            {% for stamp in stamps %}
+                {% set unlocked = stamp.id in unlocked_stamp_ids %}
+                <!-- Apply slight random rotation in inline styles for stamps to look physically stamped! -->
+                <div class="stamp-slot {% if unlocked %}unlocked{% else %}locked{% endif %}" 
+                     style="--rot: {{ [-6, -4, -2, 2, 4, 6]|random }}">
+                    
+                    <div class="stamp-icon">
+                        <i class="fa-solid {{ stamp.icon }}"></i>
+                    </div>
+                    
+                    <div class="stamp-name">{{ stamp.name }}</div>
+                    
+                    {% if unlocked %}
+                        <div class="stamp-desc" style="color: #C4A45A;">Approved Decision</div>
+                        <div class="stamp-unlocked-date">UNLOCKED: {{ unlock_dates[stamp.id] }}</div>
+                    {% else %}
+                        <div class="stamp-lock-req">Locked</div>
+                        <div class="stamp-desc">{{ stamp.description }}</div>
+                    {% endif %}
+                    
+                </div>
+            {% endfor %}
+            
+        </div>
+
+        <!-- Passport Summary/Footer -->
+        <div class="passport-footer">
+            <h4 style="color: #C4A45A; margin-bottom: 5px;">PASSPORT PROGRESS: {{ unlocked_stamp_ids|length }} / {{ stamps|length }} STAMPS</h4>
+            <p style="font-size: 0.75rem; color: var(--text-muted); max-width: 500px; margin: 0 auto;">
+                Unlock all 6 core stamps (Fishing Master, Tsunami Ready, Ocean Protector, Weather Wise, Safe Navigator, Deep Sea Explorer) to qualify for the ultimate <strong>Ocean Guardian Badge</strong>!
+            </p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

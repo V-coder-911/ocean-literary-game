@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+
+{% block title %}OceanQuest - Become an Ocean Guardian{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Hero Section Styling */
+    .hero-section {
+        position: relative;
+        min-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 60px 20px;
+        background: linear-gradient(180deg, rgba(3, 10, 22, 0.4) 0%, rgba(7, 25, 48, 0.9) 100%),
+                    radial-gradient(ellipse at center, rgba(0, 180, 216, 0.15) 0%, transparent 70%);
+        overflow: hidden;
+    }
+
+    /* Cinematic Light Rays coming from top */
+    .light-rays {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(60deg, rgba(0, 245, 212, 0.03) 0px, rgba(0, 245, 212, 0.03) 40px, transparent 40px, transparent 80px);
+        mask-image: radial-gradient(circle at 50% 0%, black, transparent 70%);
+        -webkit-mask-image: radial-gradient(circle at 50% 0%, black, transparent 70%);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .hero-content {
+        max-width: 900px;
+        z-index: 10;
+        margin-bottom: 50px;
+    }
+
+    .tagline-badge {
+        background: rgba(0, 245, 212, 0.12);
+        border: 1px solid var(--primary-cyan);
+        color: var(--primary-cyan);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+        display: inline-block;
+        box-shadow: 0 0 15px rgba(0, 245, 212, 0.1);
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1.15;
+        background: linear-gradient(135deg, #FFFFFF 30%, var(--primary-cyan) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+        text-shadow: 0 0 30px rgba(0, 245, 212, 0.2);
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: var(--text-muted);
+        max-width: 700px;
+        margin: 0 auto 35px auto;
+        line-height: 1.6;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Ship & Marine Life Visual elements */
+    .marine-silhouette {
+        position: absolute;
+        bottom: 120px;
+        left: 10%;
+        width: 180px;
+        opacity: 0.15;
+        pointer-events: none;
+        animation: float-ship 12s infinite ease-in-out;
+        z-index: 2;
+    }
+    
+    .whale-silhouette {
+        position: absolute;
+        bottom: 80px;
+        right: 12%;
+        width: 140px;
+        opacity: 0.12;
+        pointer-events: none;
+        animation: float-whale 16s infinite ease-in-out;
+        z-index: 2;
+    }
+
+    @keyframes float-ship {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(2deg); }
+    }
+    
+    @keyframes float-whale {
+        0%, 100% { transform: translateY(0) scaleX(1); }
+        50% { transform: translateY(-20px) translateX(-30px) scaleX(0.95); }
+    }
+
+    /* Animated CSS Waves */
+    .waves {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100px;
+        z-index: 5;
+    }
+
+    .wave {
+        position: absolute;
+        bottom: 0;
+        width: 200%;
+        height: 100%;
+        background-repeat: repeat-x;
+        background-position: 0 bottom;
+        transform-origin: center bottom;
+    }
+
+    .wave1 {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,0 C150,90 350,90 500,0 C650,90 850,90 1000,0 C1150,90 1350,90 1500,0 L1500,120 L0,120 Z" fill="%23071930" opacity="0.5"/></svg>');
+        animation: wave-move 20s linear infinite;
+        z-index: 8;
+    }
+
+    .wave2 {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,0 C150,60 350,60 500,0 C650,60 850,60 1000,0 C1150,60 1350,60 1500,0 L1500,120 L0,120 Z" fill="%23030a16" opacity="0.8"/></svg>');
+        animation: wave-move 15s linear infinite reverse;
+        z-index: 9;
+    }
+
+    @keyframes wave-move {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+
+    /* Feature Cards */
+    .features-section {
+        background: #071930;
+        padding: 80px 0;
+        position: relative;
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--primary-cyan), var(--secondary-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+    }
+
+    /* Literacy Info Section */
+    .literacy-section {
+        padding: 80px 0;
+        text-align: center;
+        background: radial-gradient(circle at center, rgba(0, 180, 216, 0.05) 0%, var(--bg-dark) 80%);
+    }
+
+    .literacy-text {
+        max-width: 800px;
+        margin: 0 auto 40px auto;
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: var(--text-muted);
+    }
+
+    .literacy-grid {
+        margin-top: 50px;
+        text-align: left;
+    }
+
+    .literacy-item {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .literacy-bullet {
+        font-size: 1.5rem;
+        color: var(--primary-cyan);
+        background: rgba(0, 245, 212, 0.1);
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        flex-shrink: 0;
+        border: 1px solid rgba(0, 245, 212, 0.2);
+    }
+
+    /* How it works CTA section */
+    .how-it-works {
+        padding: 60px 20px;
+        text-align: center;
+        background: rgba(10, 34, 64, 0.2);
+        border: 1px solid rgba(0, 180, 216, 0.1);
+        border-radius: 20px;
+        margin-top: 40px;
+    }
+
+    @media (max-width: 768px) {
+        .hero-title { font-size: 2.3rem; }
+        .hero-subtitle { font-size: 1rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="light-rays"></div>
+    
+    <!-- Ship Silhouette Floating -->
+    <svg class="marine-silhouette" viewBox="0 0 100 60" fill="currentColor">
+        <path d="M 10 50 L 90 50 L 95 40 L 75 40 L 70 30 L 30 30 L 25 40 L 5 40 Z" />
+        <rect x="40" y="15" width="20" height="15" />
+        <line x1="50" y1="15" x2="50" y2="5" stroke="currentColor" stroke-width="2"/>
+    </svg>
+
+    <!-- Whale Silhouette Swimming -->
+    <svg class="whale-silhouette" viewBox="0 0 100 40" fill="currentColor">
+        <path d="M 5 20 C 20 5, 80 5, 95 20 C 85 22, 80 32, 90 35 C 80 35, 70 25, 55 25 C 40 25, 20 30, 5 20 Z" />
+    </svg>
+
+    <div class="hero-content">
+        <span class="tagline-badge">
+            <i class="fa-solid fa-compass-drafting"></i> Learn the Ocean. Make the Right Decision.
+        </span>
+        <h1 class="hero-title">THE OCEAN NEEDS A SMARTER GENERATION.</h1>
+        <p class="hero-subtitle">Learn ocean science by making real-world decisions in an interactive ocean simulation. Solve dynamic challenges as a captain, fisherman, or operator.</p>
+        
+        <div class="hero-actions">
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('roles') }}" class="btn-glow">
+                    <i class="fa-solid fa-anchor"></i> START YOUR JOURNEY 🌊
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn-glow">
+                    <i class="fa-solid fa-anchor"></i> START YOUR JOURNEY 🌊
+                </a>
+            {% endif %}
+            <a href="{{ url_for('ocean_map') }}" class="btn-secondary">
+                <i class="fa-solid fa-earth-asia"></i> EXPLORE OCEAN
+            </a>
+        </div>
+    </div>
+
+    <!-- Animated Waves Overlay -->
+    <div class="waves">
+        <div class="wave wave1"></div>
+        <div class="wave wave2"></div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <h2 style="text-align: center; margin-bottom: 50px; font-size: 2.2rem;">Core Gameplay Dynamics</h2>
+        <div class="grid-4">
+            <!-- Play & Learn -->
+            <div class="glass-card">
+                <div class="feature-icon"><i class="fa-solid fa-gamepad"></i></div>
+                <h3 style="margin-bottom: 12px;">1. 🎮 PLAY & LEARN</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">Roleplay as a Fisherman, Captain, or Operator. Balance safety and profit based on ocean conditions.</p>
+            </div>
+            
+            <!-- Real Ocean Scenarios -->
+            <div class="glass-card">
+                <div class="feature-icon"><i class="fa-solid fa-chart-area"></i></div>
+                <h3 style="margin-bottom: 12px;">2. 🌊 REAL SCENARIOS</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">Simulate actual maritime warnings. Decode wave height, sea temperature, wind, and alerts.</p>
+            </div>
+            
+            <!-- Build Ocean Knowledge -->
+            <div class="glass-card">
+                <div class="feature-icon"><i class="fa-solid fa-brain"></i></div>
+                <h3 style="margin-bottom: 12px;">3. 🧠 OCEAN IQ</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">Boost your Knowledge Score. Master ocean basics, weather shifts, conservation, and survival rules.</p>
+            </div>
+            
+            <!-- Compete & Climb -->
+            <div class="glass-card">
+                <div class="feature-icon"><i class="fa-solid fa-trophy"></i></div>
+                <h3 style="margin-bottom: 12px;">4. 🏆 COMPETE</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">Earn high XP and climb the leaderboard. Unlock achievements and passport stamps.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Ocean Literacy Matters -->
+<section class="literacy-section">
+    <div class="container">
+        <h2 style="font-size: 2.2rem; margin-bottom: 20px;">Why Ocean Literacy Matters</h2>
+        <p class="literacy-text">Understanding ocean conditions is not just a scientific endeavor; it is essential for the lives and livelihoods of millions. By learning how waves, winds, temperatures, and alerts interact, we make choices that preserve our marine ecosystems and protect human lives.</p>
+        
+        <div class="grid-3 literacy-grid">
+            <div class="literacy-item">
+                <div class="literacy-bullet"><i class="fa-solid fa-fish"></i></div>
+                <div>
+                    <h4 style="margin-bottom: 8px;">Fishermen Livelihoods</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">Identifying Potential Fishing Zones (PFZ) increases yield while reducing fuel waste and avoiding sudden squalls.</p>
+                </div>
+            </div>
+            
+            <div class="literacy-item">
+                <div class="literacy-bullet"><i class="fa-solid fa-ship"></i></div>
+                <div>
+                    <h4 style="margin-bottom: 8px;">Maritime Navigation</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">Ship captains navigate safely through high-wave warnings and cyclones, avoiding disastrous accidents at sea.</p>
+                </div>
+            </div>
+            
+            <div class="literacy-item">
+                <div class="literacy-bullet"><i class="fa-solid fa-shield-halved"></i></div>
+                <div>
+                    <h4 style="margin-bottom: 8px;">Disaster Preparedness</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">Being aware of tsunami indicators and storm surge alerts saves coastal communities during extreme events.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works & Additional CTAs -->
+        <div class="how-it-works glass-card">
+            <h3 style="margin-bottom: 15px; color: var(--primary-cyan);">How it works</h3>
+            <p style="color: var(--text-muted); margin-bottom: 25px; max-width: 600px; margin-left: auto; margin-right: auto;">Choose your role, analyze advisory boards, and make critical decisions. Get immediate explanations of the scientific reasoning behind correct choices.</p>
+            <div class="hero-actions">
+                <a href="#tutorial" onclick="alert('How It Works: Select a role, view ocean data (wind, waves), choose the safest/most sustainable action, and level up your Ocean Passport!')" class="btn-secondary">
+                    <i class="fa-solid fa-circle-info"></i> HOW IT WORKS
+                </a>
+                <a href="{{ url_for('learn') }}" class="btn-secondary">
+                    <i class="fa-solid fa-book-open"></i> EXPLORE OCEAN KNOWLEDGE
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
