@@ -1,0 +1,698 @@
+
+
+// ============================================================
+// OCEANQUEST — GAME DATA (Simulated Ocean Advisory Data)
+// ============================================================
+
+const OCEAN_DATA = {
+  zones: [
+    {
+      id: "zone_as_a",
+      name: "Arabian Sea — Zone A",
+      coords: { x: 22, y: 45 },
+      waveHeight: 1.2,
+      windSpeed: 14,
+      windDir: "NW",
+      sst: 28.5,
+      fishPotential: "HIGH",
+      weather: "Clear",
+      safety: "SAFE",
+      current: "0.8 knots N",
+      visibility: "12 km",
+      alerts: [],
+    },
+    {
+      id: "zone_as_b",
+      name: "Arabian Sea — Zone B",
+      coords: { x: 18, y: 38 },
+      waveHeight: 2.8,
+      windSpeed: 38,
+      windDir: "SW",
+      sst: 27.2,
+      fishPotential: "MEDIUM",
+      weather: "Cloudy",
+      safety: "CAUTION",
+      current: "1.5 knots SW",
+      visibility: "6 km",
+      alerts: ["HIGH_WAVE"],
+    },
+    {
+      id: "zone_bb_a",
+      name: "Bay of Bengal — Zone A",
+      coords: { x: 68, y: 42 },
+      waveHeight: 3.5,
+      windSpeed: 52,
+      windDir: "NE",
+      sst: 29.1,
+      fishPotential: "LOW",
+      weather: "Storm",
+      safety: "DANGER",
+      current: "2.2 knots NE",
+      visibility: "2 km",
+      alerts: ["STORM_WARNING", "HIGH_WAVE"],
+    },
+    {
+      id: "zone_bb_b",
+      name: "Bay of Bengal — Zone B",
+      coords: { x: 74, y: 52 },
+      waveHeight: 1.8,
+      windSpeed: 22,
+      windDir: "E",
+      sst: 28.8,
+      fishPotential: "HIGH",
+      weather: "Partly Cloudy",
+      safety: "SAFE",
+      current: "1.0 knots E",
+      visibility: "9 km",
+      alerts: [],
+    },
+    {
+      id: "zone_kerala",
+      name: "Kerala Coast",
+      coords: { x: 30, y: 60 },
+      waveHeight: 0.9,
+      windSpeed: 11,
+      windDir: "SW",
+      sst: 29.4,
+      fishPotential: "HIGH",
+      weather: "Clear",
+      safety: "SAFE",
+      current: "0.6 knots S",
+      visibility: "14 km",
+      alerts: [],
+    },
+    {
+      id: "zone_tsunami",
+      name: "Andaman Deep Water",
+      coords: { x: 84, y: 36 },
+      waveHeight: 5.2,
+      windSpeed: 65,
+      windDir: "N",
+      sst: 26.8,
+      fishPotential: "LOW",
+      weather: "Severe Storm",
+      safety: "DANGER",
+      current: "3.5 knots N",
+      visibility: "0.5 km",
+      alerts: ["TSUNAMI_ALERT", "STORM_WARNING", "HIGH_WAVE"],
+    },
+  ],
+
+  missions: [
+    {
+      id: 1,
+      title: "Find the Fish",
+      subtitle: "MISSION 01 — FISHING DECISION",
+      role: ["Fisherman", "Ocean Explorer"],
+      difficulty: "EASY",
+      description:
+        "You are a fisherman setting out at dawn. The ocean advisory board has released today's fishing zone data. You must identify the best and safest zone to maximize your catch.",
+      conditions: {
+        waveHeight: "1.2 m",
+        windSpeed: "14 km/h",
+        sst: "28.5°C",
+        fishZone: "HIGH (Arabian Sea Zone A)",
+        weather: "Clear skies",
+        safety: "SAFE",
+        alert: "None",
+      },
+      question: "Which fishing zone should you head to?",
+      options: [
+        {
+          id: "A",
+          text: "Arabian Sea Zone A — Clear sky, 1.2m waves, HIGH fish potential",
+          correct: true,
+          excellent: true,
+          feedback:
+            "EXCELLENT DECISION! Arabian Sea Zone A has the best combination of safety (1.2m waves, clear weather) and fish potential (HIGH). This is exactly how ocean literacy saves lives and increases catch efficiency.",
+          points: 150,
+          xp: 75,
+        },
+        {
+          id: "B",
+          text: "Bay of Bengal Zone A — Storm warning, 3.5m waves",
+          correct: false,
+          dangerous: true,
+          feedback:
+            "DANGEROUS DECISION! The Bay of Bengal Zone A has a STORM WARNING with 3.5m waves and 52 km/h winds. Entering this zone risks your life and vessel. Always check ocean advisories before sailing.",
+          points: -100,
+          xp: 0,
+        },
+        {
+          id: "C",
+          text: "Arabian Sea Zone B — Cloudy, 2.8m waves, MEDIUM fish potential",
+          correct: false,
+          feedback:
+            "NOT IDEAL. While Arabian Sea Zone B has medium fish potential, the 2.8m waves and 38 km/h winds with cloudy weather make it a caution zone. Zone A is clearly better for both safety and catch.",
+          points: -50,
+          xp: 0,
+        },
+        {
+          id: "D",
+          text: "Stay at port — Skip fishing today entirely",
+          correct: false,
+          feedback:
+            "OVERCAUTIOUS. While safety is priority, today's conditions at Arabian Sea Zone A are excellent. Learning to read ocean data allows you to fish safely on good days and stay home on dangerous ones.",
+          points: 0,
+          xp: 10,
+        },
+      ],
+      explanation:
+        "Ocean literacy teaches us to use ocean advisory data to make smart decisions. Experienced fishermen who understand wave heights, wind speeds, and fish potential zones can be both safer and more productive.",
+      reward: { xp: 75, points: 150 },
+    },
+    {
+      id: 2,
+      title: "Rising Waves",
+      subtitle: "MISSION 02 — EMERGENCY DECISION",
+      role: ["Ship Captain", "Fisherman"],
+      difficulty: "MEDIUM",
+      description:
+        "You are 40 km offshore when an updated ocean advisory is received. Wave heights have increased from 1.5m to 2.8m and are still rising. A HIGH WAVE WARNING has been issued for your current zone.",
+      conditions: {
+        waveHeight: "2.8 m (Rising)",
+        windSpeed: "38 km/h (Increasing)",
+        sst: "27.2°C",
+        fishZone: "MEDIUM",
+        weather: "Cloudy, deteriorating",
+        safety: "CAUTION -> WARNING",
+        alert: "HIGH WAVE WARNING",
+      },
+      question: "What is the safest decision for your crew?",
+      options: [
+        {
+          id: "A",
+          text: "Return to port immediately on the safest available route",
+          correct: true,
+          excellent: true,
+          feedback:
+            "CORRECT! A HIGH WAVE WARNING means conditions are deteriorating and will likely get worse. The safest decision is to return to port immediately while conditions are still manageable. Fishing can wait — lives cannot.",
+          points: 150,
+          xp: 75,
+        },
+        {
+          id: "B",
+          text: "Continue fishing — the catch today has been excellent",
+          correct: false,
+          dangerous: true,
+          feedback:
+            "WRONG! Never prioritize catch over crew safety. Wave heights are rising and a HIGH WAVE WARNING is active. Vessels have been lost in similar conditions. This decision costs lives.",
+          points: -100,
+          xp: 0,
+        },
+        {
+          id: "C",
+          text: "Move further offshore to avoid coastal rough patches",
+          correct: false,
+          feedback:
+            "INCORRECT. Moving further offshore during rising waves and deteriorating weather increases risk. Storm systems build quickly. Return to port is the correct action under a HIGH WAVE WARNING.",
+          points: -50,
+          xp: 0,
+        },
+        {
+          id: "D",
+          text: "Anchor in place and wait for conditions to improve",
+          correct: false,
+          feedback:
+            "RISKY DECISION. Anchoring in rising wave conditions is dangerous. Anchors can drag, and 2.8m+ waves in open water are extremely hazardous. Returning to port is always safer.",
+          points: -50,
+          xp: 0,
+        },
+      ],
+      explanation:
+        "HIGH WAVE WARNINGS are issued by ocean advisory services when wave heights become hazardous for most vessels. Early return is always the correct response. Checking ocean data frequently while at sea is a key ocean literacy skill.",
+      reward: { xp: 75, points: 150 },
+    },
+    {
+      id: 3,
+      title: "Storm Approaching",
+      subtitle: "MISSION 03 — WEATHER DECISION",
+      role: ["Ship Captain", "Tourism Operator"],
+      difficulty: "MEDIUM",
+      description:
+        "You are a Ship Captain planning tomorrow's route. A storm system is developing 200km away. Ocean forecasts show wind speeds reaching 55 km/h and waves of 4m+ within 18 hours.",
+      conditions: {
+        waveHeight: "1.8 m now / 4.2 m in 18 hours",
+        windSpeed: "22 km/h now / 55 km/h in 18 hours",
+        sst: "28.8°C",
+        fishZone: "N/A",
+        weather: "Partly Cloudy / Severe Storm (18h)",
+        safety: "SAFE / DANGER",
+        alert: "STORM WARNING (Forecast)",
+      },
+      question: "How should you plan your voyage?",
+      options: [
+        {
+          id: "A",
+          text: "Delay the voyage by 48 hours and monitor storm updates",
+          correct: true,
+          excellent: true,
+          feedback:
+            "EXCELLENT! Using forecast data to delay the voyage by 48 hours until the storm passes is the mark of a skilled Ocean Guardian. Planning with ocean data saves ships and lives.",
+          points: 150,
+          xp: 75,
+        },
+        {
+          id: "B",
+          text: "Depart immediately and try to outrun the storm",
+          correct: false,
+          dangerous: true,
+          feedback:
+            "EXTREMELY DANGEROUS! Storm systems are unpredictable and fast-moving. Attempting to outrun a storm in a vessel is one of the leading causes of maritime disasters. Never gamble with a storm.",
+          points: -100,
+          xp: 0,
+        },
+        {
+          id: "C",
+          text: "Depart on schedule — the storm is still 18 hours away",
+          correct: false,
+          feedback:
+            "INCORRECT. If the storm arrives in 18 hours, you could be at sea when it hits. Travel time plus storm timing means this decision puts the vessel in danger. Always plan for worst-case scenarios.",
+          points: -50,
+          xp: 0,
+        },
+        {
+          id: "D",
+          text: "Request alternate route guidance from maritime authority",
+          correct: false,
+          feedback:
+            "PARTIALLY CORRECT. Contacting maritime authorities is always a good idea, but the first action should be to delay departure. Route changes may not be sufficient when a severe storm is forecast.",
+          points: 50,
+          xp: 25,
+        },
+      ],
+      explanation:
+        "Ocean forecast data allows maritime professionals to make proactive safety decisions. Real ocean literacy means not just reacting to emergencies — but preventing them through intelligent use of ocean information.",
+      reward: { xp: 75, points: 150 },
+    },
+    {
+      id: 4,
+      title: "Tsunami Alert",
+      subtitle: "MISSION 04 — EMERGENCY RESPONSE",
+      role: ["Fisherman", "Tourism Operator", "Ocean Explorer"],
+      difficulty: "HARD",
+      description:
+        "You are a fishing boat operator 5km from the coast when a TSUNAMI WARNING is issued following a magnitude 7.8 underwater earthquake near the Andaman Islands.",
+      conditions: {
+        waveHeight: "Normal now — TSUNAMI WAVE APPROACHING",
+        windSpeed: "12 km/h",
+        sst: "29°C",
+        fishZone: "N/A — EMERGENCY",
+        weather: "Clear",
+        safety: "DANGER — TSUNAMI WARNING",
+        alert: "TSUNAMI WARNING ACTIVE",
+      },
+      question: "What is the CORRECT immediate action?",
+      options: [
+        {
+          id: "A",
+          text: "Move vessel immediately to DEEP WATER (away from shore)",
+          correct: true,
+          excellent: true,
+          feedback:
+            "CORRECT! When at sea during a tsunami warning, moving to DEEP WATER is the safest action for boats. Tsunami waves are less dangerous in deep water but extremely destructive near shore. Return to port ONLY after all-clear.",
+          points: 150,
+          xp: 75,
+        },
+        {
+          id: "B",
+          text: "Rush to the nearest harbor to dock before the wave arrives",
+          correct: false,
+          dangerous: true,
+          feedback:
+            "FATAL MISTAKE! Do NOT rush to harbor during a tsunami. Harbors are extremely dangerous during tsunamis — the wave surge can destroy everything at port. Your vessel is safer in deep water.",
+          points: -100,
+          xp: 0,
+        },
+        {
+          id: "C",
+          text: "Stay in current position and observe what happens",
+          correct: false,
+          dangerous: true,
+          feedback:
+            "WRONG! A 5km distance from shore puts you in a tsunami impact zone. Immediate action is required. Every second counts in a tsunami emergency.",
+          points: -100,
+          xp: 0,
+        },
+        {
+          id: "D",
+          text: "Head to shore and warn people on the beach",
+          correct: false,
+          dangerous: true,
+          feedback:
+            "DANGEROUS! Your priority is your own survival and crew safety. Moving toward shore during an active tsunami warning puts you in maximum danger. Emergency services on land will handle coastal warnings.",
+          points: -100,
+          xp: 0,
+        },
+      ],
+      explanation:
+        "TSUNAMI RULE: If you are AT SEA when a tsunami warning is issued, move to DEEP WATER immediately. If you are ON LAND, move to HIGH GROUND inland. Never go to the beach to watch a tsunami. Ocean literacy can save your life in these critical moments.",
+      reward: { xp: 75, points: 150 },
+    },
+    {
+      id: 5,
+      title: "Safe Tourism",
+      subtitle: "MISSION 05 — TOURISM DECISION",
+      role: ["Tourism Operator"],
+      difficulty: "MEDIUM",
+      description:
+        "You run a marine tourism business in Lakshadweep. Today, 45 tourists are booked for snorkeling. The ocean advisory shows 2.5m waves with a CAUTION status and moderate currents.",
+      conditions: {
+        waveHeight: "2.5 m",
+        windSpeed: "32 km/h",
+        sst: "28.2°C",
+        fishZone: "N/A",
+        weather: "Windy, partly cloudy",
+        safety: "CAUTION",
+        alert: "MODERATE CURRENT WARNING",
+      },
+      question: "What should you do about today's snorkeling tour?",
+      options: [
+        {
+          id: "A",
+          text: "Cancel the snorkeling tour and offer a land-based alternative",
+          correct: true,
+          excellent: true,
+          feedback:
+            "EXCELLENT! With 2.5m waves, 32 km/h winds, and moderate current warnings, snorkeling activities are unsafe. A responsible operator always prioritizes tourist safety over revenue. This is excellent ocean literacy.",
+          points: 150,
+          xp: 75,
+        },
+        {
+          id: "B",
+          text: "Conduct the tour as planned — tourists paid for snorkeling",
+          correct: false,
+          dangerous: true,
+          feedback:
+            "WRONG! Endangering tourists in unsafe ocean conditions is both unethical and illegal. 2.5m waves and strong currents can overwhelm even experienced swimmers. Operator liability is also a serious concern.",
+          points: -100,
+          xp: 0,
+        },
+        {
+          id: "C",
+          text: "Offer only boat tour, no water activities",
+          correct: false,
+          feedback:
+            "PARTIALLY ACCEPTABLE. A boat tour may still be borderline with 2.5m waves and moderate currents. Canceling water activities is correct, but even the boat tour should be evaluated for safety.",
+          points: 50,
+          xp: 25,
+        },
+        {
+          id: "D",
+          text: "Ask tourists to decide for themselves",
+          correct: false,
+          feedback:
+            "INCORRECT. As the licensed operator, safety decisions are your responsibility — not the tourists'. Most tourists lack the knowledge to assess ocean conditions. Your expertise is their protection.",
+          points: -50,
+          xp: 0,
+        },
+      ],
+      explanation:
+        "Tourism operators with ocean literacy protect their customers, their business, and marine ecosystems. Understanding ocean advisories and making the right call — even at financial cost — is the hallmark of a responsible ocean professional.",
+      reward: { xp: 75, points: 150 },
+    },
+    {
+      id: 6,
+      title: "Protect Marine Life",
+      subtitle: "MISSION 06 — SUSTAINABILITY DECISION",
+      role: ["Ocean Explorer", "Fisherman"],
+      difficulty: "MEDIUM",
+      description:
+        "Your fishing vessel enters what appears to be an excellent fishing zone. However, your ocean map shows this area is marked as a Marine Protected Area (MPA) and is in a coral spawning season.",
+      conditions: {
+        waveHeight: "1.0 m",
+        windSpeed: "10 km/h",
+        sst: "29.8°C",
+        fishZone: "HIGH (Protected Zone)",
+        weather: "Clear",
+        safety: "SAFE",
+        alert: "MARINE PROTECTED AREA — Coral Spawning Season",
+      },
+      question: "What is the sustainable and legal decision?",
+      options: [
+        {
+          id: "A",
+          text: "Leave the area immediately — respect the Marine Protected Area",
+          correct: true,
+          excellent: true,
+          feedback:
+            "EXCELLENT! Leaving a Marine Protected Area and respecting spawning seasons is not just legally required — it protects the very fish populations that fishermen depend on. Sustainable fishing ensures the ocean remains productive for generations.",
+          points: 150,
+          xp: 75,
+        },
+        {
+          id: "B",
+          text: "Fish quickly and leave before patrol boats arrive",
+          correct: false,
+          dangerous: true,
+          feedback:
+            "ILLEGAL AND WRONG! Illegal fishing in MPAs is a criminal offense with heavy fines and vessel confiscation. More importantly, it destroys coral ecosystems that support entire marine food chains.",
+          points: -100,
+          xp: 0,
+        },
+        {
+          id: "C",
+          text: "Fish in a small area near the edge of the protected zone",
+          correct: false,
+          feedback:
+            "INCORRECT. Even edge fishing during coral spawning season is harmful. Marine Protected Areas have defined boundaries that must be fully respected. Partial compliance is still a violation.",
+          points: -50,
+          xp: 0,
+        },
+        {
+          id: "D",
+          text: "Report the MPA marking as incorrect to authorities",
+          correct: false,
+          feedback:
+            "NOT APPROPRIATE. MPAs are scientifically designated areas. Falsely reporting them is unethical. If you genuinely believe there is an error, contact authorities — but do not fish in the area while doing so.",
+          points: 0,
+          xp: 10,
+        },
+      ],
+      explanation:
+        "Marine Protected Areas (MPAs) are essential for ocean health. They protect spawning grounds, coral reefs, and biodiversity. Ocean-literate fishermen understand that protecting these areas today means healthier fish stocks and better catches tomorrow.",
+      reward: { xp: 75, points: 150 },
+    },
+    {
+      id: 7,
+      title: "Navigation Challenge",
+      subtitle: "MISSION 07 — ROUTE PLANNING",
+      role: ["Ship Captain"],
+      difficulty: "HARD",
+      description:
+        "You are a cargo ship captain planning a route from Mumbai to Chennai. Route A passes through a storm system. Route B is longer but through calm waters.",
+      conditions: {
+        routeA: "Direct — 1,200 km — Storm zone (3.8m waves, 48 km/h wind)",
+        routeB: "Alternate — 1,550 km — Calm (1.5m waves, 18 km/h wind)",
+        weather: "Storm system active on direct route",
+        safety: "Route A: WARNING | Route B: SAFE",
+        alert: "STORM WARNING on direct Mumbai-Chennai route",
+      },
+      question: "Which route should you choose?",
+      options: [
+        {
+          id: "A",
+          text: "Route B — the longer but safe route through calm waters",
+          correct: true,
+          excellent: true,
+          feedback:
+            "CORRECT! The longer safe route is the right choice. Ship structural integrity, crew safety, cargo security, and fuel efficiency all favor Route B. Rough seas increase fuel consumption significantly — so Route A often uses MORE fuel.",
+          points: 150,
+          xp: 75,
+        },
+        {
+          id: "B",
+          text: "Route A — direct route to save fuel and time",
+          correct: false,
+          dangerous: true,
+          feedback:
+            "WRONG! Sailing through a storm with 3.8m waves and 48 km/h winds endangers crew, damages cargo, and stresses vessel structure. Rough seas also increase fuel consumption — so Route A often uses MORE fuel than Route B.",
+          points: -100,
+          xp: 0,
+        },
+        {
+          id: "C",
+          text: "Wait at Mumbai port until storm passes",
+          correct: false,
+          feedback:
+            "PARTIALLY ACCEPTABLE if storm clears within 12-24 hours. However, if the storm persists, Route B is the better operational decision. Port waiting has significant cost implications for cargo ships.",
+          points: 50,
+          xp: 25,
+        },
+        {
+          id: "D",
+          text: "Take Route A but slow down in the storm",
+          correct: false,
+          feedback:
+            "INCORRECT. Slowing down in a storm reduces maneuverability and increases exposure time to dangerous conditions. Route B avoids the hazard entirely — that is always preferable.",
+          points: -50,
+          xp: 0,
+        },
+      ],
+      explanation:
+        "Route planning using ocean data is a fundamental maritime skill. Ocean-literate captains use wave forecasts, wind data, and storm tracking to plan safe routes. The safest route is almost always the most efficient route overall.",
+      reward: { xp: 75, points: 150 },
+    },
+    {
+      id: 8,
+      title: "Emergency Response",
+      subtitle: "MISSION 08 — RAPID RESPONSE",
+      role: ["Ship Captain", "Fisherman", "Ocean Explorer"],
+      difficulty: "EXPERT",
+      description:
+        "Your vessel's radio picks up a MAYDAY call from a fishing boat taking on water 8km to your east. Your vessel is the nearest. Conditions: 2.0m waves, 25 km/h winds.",
+      conditions: {
+        waveHeight: "2.0 m",
+        windSpeed: "25 km/h",
+        sst: "28°C",
+        fishZone: "N/A — EMERGENCY",
+        weather: "Moderate seas",
+        safety: "CAUTION",
+        alert: "MAYDAY SIGNAL RECEIVED — 8km East",
+      },
+      question: "What is the correct maritime emergency response?",
+      options: [
+        {
+          id: "A",
+          text: "Immediately head toward the distressed vessel and alert Coast Guard",
+          correct: true,
+          excellent: true,
+          feedback:
+            "PERFECT RESPONSE! International maritime law requires vessels to respond to MAYDAY calls when reasonably able. Alerting Coast Guard first, then proceeding to assist, is the correct sequence.",
+          points: 150,
+          xp: 75,
+        },
+        {
+          id: "B",
+          text: "Ignore the call — it is not your responsibility",
+          correct: false,
+          dangerous: true,
+          feedback:
+            "ILLEGAL! Under international maritime law (SOLAS), all mariners are legally required to respond to distress calls when reasonably possible. Ignoring a MAYDAY is a criminal offense and a profound moral failure.",
+          points: -100,
+          xp: 0,
+        },
+        {
+          id: "C",
+          text: "Call Coast Guard only and continue your journey",
+          correct: false,
+          feedback:
+            "INCOMPLETE. Alerting Coast Guard is correct, but as the nearest vessel, maritime law requires you to also respond directly. Conditions (2.0m waves, 25 km/h wind) are manageable for most vessels.",
+          points: 25,
+          xp: 15,
+        },
+        {
+          id: "D",
+          text: "Wait for Coast Guard — it is too dangerous to respond yourself",
+          correct: false,
+          feedback:
+            "INCORRECT. 2.0m waves and 25 km/h winds are CAUTION conditions — not preventing rescue. Waiting for Coast Guard when you are the nearest vessel delays help and could cost lives.",
+          points: -50,
+          xp: 0,
+        },
+      ],
+      explanation:
+        "The MAYDAY response protocol is one of the most important aspects of ocean literacy for maritime professionals. Under SOLAS, all vessels are required to render assistance to those in distress at sea.",
+      reward: { xp: 75, points: 150 },
+    },
+  ],
+
+  leaderboard: [
+    { rank: 1, name: "OceanKing", role: "Ship Captain", points: 8420, level: 12, country: "IN", streak: 15 },
+    { rank: 2, name: "SeaMaster", role: "Ocean Explorer", points: 7980, level: 11, country: "IN", streak: 12 },
+    { rank: 3, name: "WaveRider", role: "Fisherman", points: 7450, level: 10, country: "IN", streak: 9 },
+    { rank: 4, name: "TidalForce", role: "Tourism Op.", points: 6890, level: 9, country: "IN", streak: 7 },
+    { rank: 5, name: "DeepDiver", role: "Ocean Explorer", points: 6340, level: 9, country: "IN", streak: 5 },
+    { rank: 6, name: "CoralGuard", role: "Fisherman", points: 5820, level: 8, country: "IN", streak: 4 },
+    { rank: 7, name: "SaltSpray", role: "Ship Captain", points: 5210, level: 7, country: "IN", streak: 3 },
+    { rank: 8, name: "MarineHero", role: "Tourism Op.", points: 4650, level: 6, country: "IN", streak: 2 },
+    { rank: 9, name: "BluePlanet", role: "Fisherman", points: 4120, level: 6, country: "IN", streak: 1 },
+    { rank: 10, name: "TurtleBack", role: "Ocean Explorer", points: 3780, level: 5, country: "IN", streak: 1 },
+  ],
+
+  achievements: [
+    { id: "first_voyage", name: "First Voyage", icon: "trophy", desc: "Complete your first mission", unlocked: true, xp: 50 },
+    { id: "wave_master", name: "Wave Master", icon: "waves", desc: "Correctly handle 5 wave scenarios", unlocked: true, xp: 100 },
+    { id: "smart_fisher", name: "Smart Fisher", icon: "set-square", desc: "Complete 3 fishing missions perfectly", unlocked: false, xp: 150 },
+    { id: "nav_expert", name: "Navigation Expert", icon: "compass", desc: "Navigate safely through 3 storms", unlocked: false, xp: 200 },
+    { id: "storm_survivor", name: "Storm Survivor", icon: "bolt", desc: "Make correct decision in storm scenario", unlocked: true, xp: 100 },
+    { id: "emergency_resp", name: "Emergency Responder", icon: "alarm", desc: "Correctly respond to 3 emergencies", unlocked: false, xp: 200 },
+    { id: "ocean_protector", name: "Ocean Protector", icon: "eco", desc: "Choose sustainable fishing 5 times", unlocked: false, xp: 250 },
+    { id: "ocean_guardian", name: "Ocean Guardian", icon: "public", desc: "Reach Level 5", unlocked: false, xp: 500 },
+    { id: "streak_3", name: "On Fire!", icon: "local_fire_department", desc: "Get 3 correct decisions in a row", unlocked: true, xp: 100 },
+    { id: "streak_5", name: "Unstoppable", icon: "electric_bolt", desc: "Get 5 correct decisions in a row", unlocked: false, xp: 250 },
+    { id: "quiz_ace", name: "Quiz Ace", icon: "quiz", desc: "Score 100% on any quiz", unlocked: false, xp: 150 },
+    { id: "daily_champ", name: "Daily Champion", icon: "today", desc: "Complete 7 daily challenges", unlocked: false, xp: 300 },
+  ],
+
+  lessons: [
+    { id: "ocean_basics", category: "Ocean Basics", title: "Understanding Ocean Waves", desc: "Learn how waves form, how they are measured, and what different wave heights mean for safety.", duration: "5 min", xp: 50, difficulty: "Easy" },
+    { id: "tsunami", category: "Extreme Events", title: "What is a Tsunami?", desc: "Discover how tsunamis form from underwater earthquakes and how to respond correctly.", duration: "6 min", xp: 60, difficulty: "Medium" },
+    { id: "fish_zones", category: "Sustainable Fishing", title: "Reading Fish Potential Zones", desc: "Understand how sea surface temperature and currents indicate productive fishing areas.", duration: "7 min", xp: 70, difficulty: "Medium" },
+    { id: "weather", category: "Ocean & Weather", title: "Ocean Weather Patterns", desc: "Learn how tropical cyclones form over warm ocean waters and how to track them.", duration: "8 min", xp: 80, difficulty: "Hard" },
+    { id: "marine_life", category: "Marine Life", title: "India's Marine Biodiversity", desc: "Explore the rich marine ecosystems of the Indian Ocean, Arabian Sea, and Bay of Bengal.", duration: "6 min", xp: 60, difficulty: "Easy" },
+    { id: "maritime_safety", category: "Maritime Safety", title: "MAYDAY and Emergency Protocols", desc: "Learn the international maritime emergency procedures all seafarers must know.", duration: "8 min", xp: 80, difficulty: "Hard" },
+    { id: "conservation", category: "Ocean Conservation", title: "Marine Protected Areas", desc: "Understand why MPAs are critical for ocean health and how they help rebuild fish populations.", duration: "5 min", xp: 50, difficulty: "Easy" },
+    { id: "climate", category: "Climate & Ocean", title: "Ocean Warming and Its Effects", desc: "Discover how rising sea temperatures affect marine life, coral reefs, and fisheries.", duration: "7 min", xp: 70, difficulty: "Medium" },
+  ],
+
+  quizQuestions: {
+    easy: [
+      { q: "What does a HIGH WAVE WARNING mean for small boats?", options: ["Stay in port — conditions are dangerous", "Excellent time to go surfing", "Waves are just 0.5m tall", "Fish are more active"], correct: 0, exp: "HIGH WAVE WARNINGS indicate dangerous conditions for small vessels. All small boats should stay in port." },
+      { q: "What is sea surface temperature (SST) used for?", options: ["Predicting fish locations", "Measuring air humidity", "Tracking satellite signals", "Calculating tidal height"], correct: 0, exp: "SST helps predict fish locations because different species prefer different temperature ranges." },
+      { q: "When is it safe to go snorkeling?", options: ["Calm seas, clear weather, no warnings", "During a HIGH WAVE alert", "In a Marine Protected Area during spawning season", "Any time — the ocean is always safe"], correct: 0, exp: "Snorkeling is safe only in calm conditions with no active warnings or alerts." },
+      { q: "What does the GREEN zone on an ocean safety map mean?", options: ["SAFE — good conditions", "DANGER — do not enter", "CAUTION — be careful", "CLOSED — no fishing allowed"], correct: 0, exp: "Green zones indicate SAFE conditions suitable for most ocean activities." },
+      { q: "What should a fisherman do when a STORM WARNING is issued?", options: ["Return to port immediately", "Fish faster before the storm", "Move further offshore", "Ignore it — storms are unpredictable"], correct: 0, exp: "A STORM WARNING requires immediate return to port. Ocean safety always takes priority over catch." },
+    ],
+    medium: [
+      { q: "What causes a tsunami?", options: ["Underwater earthquake, volcanic eruption, or landslide", "Very strong winds on the surface", "Extremely high tides during full moon", "A large school of fish moving together"], correct: 0, exp: "Tsunamis are caused by large disturbances of the ocean floor — primarily underwater earthquakes, but also volcanic eruptions and underwater landslides." },
+      { q: "If you are at sea when a tsunami warning is issued, you should:", options: ["Move to DEEP WATER immediately", "Rush to the nearest harbor", "Anchor in place and watch", "Head toward the coast to warn people"], correct: 0, exp: "At sea, deep water is safest during a tsunami. Tsunami waves are most destructive in shallow coastal areas." },
+      { q: "What is a Marine Protected Area (MPA)?", options: ["A legally protected ocean zone where fishing is restricted", "An area with very high fish catch potential", "A zone with extremely dangerous weather", "A shipping lane reserved for cargo vessels"], correct: 0, exp: "MPAs are protected zones where human activities like fishing are restricted to allow marine ecosystems to recover and thrive." },
+      { q: "What does wave height refer to?", options: ["Distance from wave trough to wave crest", "Length between two wave crests", "Speed at which waves travel", "Depth at which waves form underwater"], correct: 0, exp: "Wave height is measured vertically from the lowest point (trough) to the highest point (crest) of a wave." },
+      { q: "Which agency in India issues ocean weather warnings for fishermen?", options: ["INCOIS (Indian National Centre for Ocean Information Services)", "ISRO (Indian Space Research Organisation)", "IMD (India Meteorological Department only)", "ONGC (Oil and Natural Gas Corporation)"], correct: 0, exp: "INCOIS issues ocean advisory services including fishery and safety warnings for India." },
+    ],
+    hard: [
+      { q: "What is the Saffir-Simpson scale used for?", options: ["Rating hurricane/cyclone intensity", "Measuring ocean current speed", "Classifying fish population density", "Grading coral reef health"], correct: 0, exp: "The Saffir-Simpson scale rates tropical cyclones from Category 1 (weakest) to Category 5 (most catastrophic) based on wind speed." },
+      { q: "SOLAS stands for:", options: ["Safety of Life at Sea", "Standard Ocean Level Assessment System", "Sea Observation and Level Alert Service", "Severe Ocean and Land Advisory System"], correct: 0, exp: "SOLAS — Safety of Life at Sea — is the primary international treaty covering the safety of merchant ships, adopted by the IMO." },
+      { q: "What does a MAYDAY call indicate?", options: ["Immediate life-threatening emergency requiring urgent assistance", "A routine safety check-in call", "A request for weather information", "A navigation position report"], correct: 0, exp: "MAYDAY is the highest level of maritime distress signal, used only when a vessel and its crew are in grave and imminent danger." },
+      { q: "Thermocline in the ocean refers to:", options: ["A layer where temperature drops sharply with depth", "The surface temperature of the sea", "A warm current running along the coast", "The temperature inside a fish's body"], correct: 0, exp: "The thermocline is a layer in the ocean where temperature decreases rapidly with increasing depth, affecting fish distribution." },
+      { q: "Which current system significantly influences India's monsoon rains?", options: ["The Indian Ocean Dipole and Arabian Sea currents", "The Pacific Ocean Gyre", "The Atlantic Meridional Overturning Circulation", "The Antarctic Circumpolar Current"], correct: 0, exp: "The Indian Ocean Dipole (IOD) and the warming patterns of the Arabian Sea significantly influence the strength and timing of India's southwest monsoon." },
+    ],
+  },
+
+  levelNames: {
+    1: "Ocean Rookie",
+    2: "Wave Watcher",
+    3: "Sea Navigator",
+    4: "Ocean Scout",
+    5: "Ocean Guardian",
+    6: "Marine Pilot",
+    7: "Sea Commander",
+    8: "Ocean Veteran",
+    9: "Deep Sea Master",
+    10: "Ocean Master",
+  },
+};
+
+// Player state
+const PLAYER_STATE = {
+  name: "OceanGuardian",
+  username: "ocean_hero",
+  role: null,
+  level: 7,
+  xp: 1560,
+  xpMax: 2000,
+  points: 4350,
+  streak: 5,
+  missionsCompleted: 14,
+  correctDecisions: 31,
+  oceanIQ: 78,
+  globalRank: 8,
+  achievements: ["first_voyage", "wave_master", "storm_survivor", "streak_3"],
+  currentMission: 0,
+  consecutiveCorrect: 0,
+  sessionPoints: 0,
+  sessionXP: 0,
+  isGuest: false,
+  dailyChallengeCompleted: false,
+};

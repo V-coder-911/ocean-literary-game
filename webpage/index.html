@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OceanQuest — Learn the Ocean. Make the Right Decision.</title>
+    <meta name="description"
+        content="OceanQuest is an interactive gamified ocean literacy platform where you learn ocean science by making real-world decisions in simulated ocean scenarios. Smart India Hackathon 2026 — SIH1660." />
+    <meta name="keywords"
+        content="ocean literacy, gamification, ocean advisory, INCOIS, fisherman safety, marine education, SIH2026" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+
+<body>
+
+    <!-- ═══ OCEAN BACKGROUND ═══ -->
+    <div class="ocean-bg"></div>
+
+    <!-- ═══ ANIMATED BUBBLES ═══ -->
+    <div class="bubbles" aria-hidden="true">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+    <div class="particles" id="particles" aria-hidden="true"></div>
+
+    <!-- ═══ NAVBAR ═══ -->
+    <nav id="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-inner">
+            <a class="nav-logo" onclick="showPage('landing')" aria-label="OceanQuest Home">
+                <div class="logo-icon" aria-hidden="true">🌊</div>
+                OceanQuest
+            </a>
+
+            <ul class="nav-links" role="list">
+                <li><a onclick="showPage('landing')" id="nav-home" class="active" tabindex="0">Home</a></li>
+                <li><a onclick="startGameFlow()" id="nav-play" tabindex="0">Play</a></li>
+                <li><a onclick="showPage('learn')" id="nav-learn" tabindex="0">Learn</a></li>
+                <li><a onclick="showPage('map')" id="nav-map" tabindex="0">Ocean Map</a></li>
+                <li><a onclick="showPage('leaderboard')" id="nav-lb" tabindex="0">Leaderboard</a></li>
+                <li><a onclick="showPage('achievements')" id="nav-ach" tabindex="0">Achievements</a></li>
+                <li><a onclick="showPage('about')" id="nav-about" tabindex="0">About</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button class="btn-nav-login" id="nav-login-btn" onclick="openAuth('login')"
+                    aria-label="Login or register">Login</button>
+                <button class="hamburger" id="hamburger" aria-label="Toggle mobile menu" aria-expanded="false"
+                    onclick="toggleMobileMenu()">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobile-menu" role="menu" aria-hidden="true">
+            <a onclick="showPage('landing'); closeMobileMenu()" role="menuitem" tabindex="0">🏠 Home</a>
+            <a onclick="startGameFlow(); closeMobileMenu()" role="menuitem" tabindex="0">🎮 Play</a>
+            <a onclick="showPage('learn'); closeMobileMenu()" role="menuitem" tabindex="0">📚 Learn</a>
+            <a onclick="showPage('map'); closeMobileMenu()" role="menuitem" tabindex="0">🗺 Ocean Map</a>
+            <a onclick="showPage('leaderboard'); closeMobileMenu()" role="menuitem" tabindex="0">🏆 Leaderboard</a>
+            <a onclick="showPage('achievements'); closeMobileMenu()" role="menuitem" tabindex="0">🎖 Achievements</a>
+            <a onclick="showPage('daily'); closeMobileMenu()" role="menuitem" tabindex="0">📅 Daily Challenge</a>
+            <a onclick="showPage('about'); closeMobileMenu()" role="menuitem" tabindex="0">ℹ About</a>
+            <a onclick="openAuth('login'); closeMobileMenu()" role="menuitem" tabindex="0">👤 Login / Register</a>
+        </div>
+    </nav>
+
+    <!-- ═══ TOAST NOTIFICATIONS ═══ -->
+    <div class="toast-container" id="toast-container" aria-live="polite" aria-label="Notifications"></div>
+
+    <!-- ═══ LEVEL UP MODAL ═══ -->
+    <div class="levelup-overlay" id="levelup-overlay" role="dialog" aria-modal="true"
+        aria-label="Level up notification">
+        <div class="levelup-box">
+            <div class="levelup-icon">🌊</div>
+            <div class="levelup-title">LEVEL UP!</div>
+            <div class="levelup-num" id="levelup-num">8</div>
+            <div class="levelup-name" id="levelup-name">Ocean Veteran</div>
+            <p class="text-muted mb-3" style="font-size:0.9rem;">You are becoming an Ocean Guardian!</p>
+            <button class="btn btn-gold" onclick="closeLevelUp()">AMAZING! CONTINUE</button>
+        </div>
+    </div>
+
+    <!-- ═══ TUTORIAL OVERLAY ═══ -->
+    <div class="tutorial-overlay" id="tutorial-overlay" role="dialog" aria-modal="true" aria-label="Game tutorial">
+        <div class="tutorial-box">
+            <div class="tutorial-steps" id="tutorial-dots"></div>
+            <h2 id="tutorial-title">Welcome to OceanQuest!</h2>
+            <p id="tutorial-body">Learn ocean literacy through real decisions. The ocean gives you information — you
+                decide what to do.</p>
+            <div class="tutorial-nav">
+                <button class="btn btn-glass btn-sm" id="tutorial-skip" onclick="skipTutorial()">Skip</button>
+                <button class="btn btn-primary btn-sm" id="tutorial-next" onclick="nextTutorialStep()">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ AUTH MODAL ═══ -->
+    <div class="modal-overlay" id="auth-modal" role="dialog" aria-modal="true" aria-label="Login or Register">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeAuth()" aria-label="Close modal">✕</button>
+            <div style="text-align:center;margin-bottom:1.5rem;">
+                <span style="font-size:2rem;">🌊</span>
+                <h2 style="font-family:var(--font-mono);font-size:1.3rem;color:var(--cyan);margin-top:0.5rem;">
+                    OceanQuest</h2>
+            </div>
+            <div class="modal-tabs" role="tablist">
+                <button class="modal-tab active" id="tab-login" role="tab" aria-selected="true"
+                    onclick="switchAuthTab('login')">Login</button>
+                <button class="modal-tab" id="tab-register" role="tab" aria-selected="false"
+                    onclick="switchAuthTab('register')">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" onsubmit="handleLogin(event)" novalidate>
+                <div class="form-group">
+                    <label for="login-user">Username or Email</label>
+                    <input type="text" id="login-user" placeholder="Enter your username or email"
+                        autocomplete="username" />
+                </div>
+                <div class="form-group">
+                    <label for="login-pass">Password</label>
+                    <input type="password" id="login-pass" placeholder="Enter your password"
+                        autocomplete="current-password" />
+                </div>
+                <div class="remember-row">
+                    <label><input type="checkbox" id="remember-me" /> Remember me</label>
+                    <a href="#" onclick="return false;">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary w-full mb-2">LOGIN TO OCEANQUEST</button>
+                <div class="auth-divider">or</div>
+                <button type="button" class="btn btn-glass w-full" onclick="playAsGuest()">🌊 PLAY AS GUEST</button>
+                <p style="font-size:0.75rem;color:var(--text-muted);text-align:center;margin-top:1rem;">
+                    Guest users can play demo missions but leaderboard progress won't be saved.
+                </p>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" onsubmit="handleRegister(event)" style="display:none;" novalidate>
+                <div class="form-group">
+                    <label for="reg-name">Full Name</label>
+                    <input type="text" id="reg-name" placeholder="Your full name" autocomplete="name" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reg-user">Username</label>
+                        <input type="text" id="reg-user" placeholder="Choose a username" autocomplete="username" />
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-age">Age Group</label>
+                        <select id="reg-age">
+                            <option value="">Select age</option>
+                            <option value="under18">Under 18</option>
+                            <option value="18-30">18 – 30</option>
+                            <option value="31-50">31 – 50</option>
+                            <option value="above50">Above 50</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">Email</label>
+                    <input type="email" id="reg-email" placeholder="your@email.com" autocomplete="email" />
+                </div>
+                <div class="form-group">
+                    <label for="reg-pass">Password</label>
+                    <input type="password" id="reg-pass" placeholder="Create a strong password"
+                        autocomplete="new-password" />
+                </div>
+                <div class="form-group">
+                    <label for="reg-lang">Preferred Language</label>
+                    <select id="reg-lang">
+                        <option value="en">English</option>
+                        <option value="hi">हिन्दी (Hindi)</option>
+                        <option value="ta">தமிழ் (Tamil)</option>
+                        <option value="ml">മലയാളം (Malayalam)</option>
+                        <option value="te">తెలుగు (Telugu)</option>
+                        <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-full mb-2">CREATE ACCOUNT</button>
+                <div class="auth-divider">or</div>
+                <button type="button" class="btn btn-glass w-full" onclick="playAsGuest()">🌊 PLAY AS GUEST</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════════════════════ -->
+    <div id="app">
+
+        <!-- ══ PAGE: LANDING ══ -->
+        <main id="page-landing" class="page active" aria-label="OceanQuest Landing Page">
+
+            <!-- Hero Section -->
+            <section class="hero" aria-labelledby="hero-heading">
+                <div class="hero-bg-anim" aria-hidden="true">
+                    <div class="hero-wave"></div>
+                    <div class="hero-wave"></div>
+                    <div class="light-rays">
+                        <div class="ray"></div>
+                        <div class="ray"></div>
+                        <div class="ray"></div>
+                        <div class="ray"></div>
+                        <div class="ray"></div>
+                        <div class="ray"></div>
+                    </div>
+                    <div class="hero-fish" aria-hidden="true">🐟</div>
+                    <div class="hero-fish" aria-hidden="true">🐬</div>
+                    <div class="hero-fish" aria-hidden="true">🐠</div>
+                    <div class="hero-whale" aria-hidden="true">🐋</div>
+                </div>
+
+                <div class="hero-content">
+                    <div class="hero-badge" role="note">
+                        🏆 Smart India Hackathon 2026 — SIH1660
+                    </div>
+
+                    <h1 class="hero-title" id="hero-heading">
+                        THE OCEAN NEEDS A<br>SMARTER GENERATION.
+                    </h1>
+
+                    <p class="hero-sub">
+                        Learn ocean science by making real-world decisions in an interactive ocean simulation.
+                        Play as a fisherman, ship captain, tourism operator, or ocean explorer.
+                    </p>
+
+                    <div class="hero-actions">
+                        <button class="btn btn-primary btn-lg" id="hero-start-btn" onclick="startGameFlow()"
+                            aria-label="Start your ocean journey">
+                            🌊 START YOUR OCEAN JOURNEY
+                        </button>
+                        <button class="btn btn-secondary btn-lg" onclick="showPage('advisory')"
+                            aria-label="Explore ocean knowledge">
+                            EXPLORE OCEAN
+                        </button>
+                    </div>
+
+                    <p class="hero-tagline">"Learn the Ocean. Make the Right Decision. Become an Ocean Guardian."</p>
+                </div>
+
+                <div class="scroll-indicator" aria-hidden="true">
+                    <span></span>
+                    Scroll
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features-section" aria-labelledby="features-heading">
+                <div style="text-align:center;">
+                    <h2 class="section-title" id="features-heading">HOW OCEANQUEST WORKS</h2>
+                    <p class="section-sub">An adventure game meets ocean education platform</p>
+                </div>
+                <div class="features-grid">
+                    <article class="feature-card">
+                        <span class="feature-icon" aria-hidden="true">🎮</span>
+                        <h3>PLAY & LEARN</h3>
+                        <p>Make real decisions in simulated ocean scenarios. Every choice teaches you something about
+                            ocean literacy, safety, and sustainability.</p>
+                    </article>
+                    <article class="feature-card">
+                        <span class="feature-icon" aria-hidden="true">🌊</span>
+                        <h3>REAL OCEAN SCENARIOS</h3>
+                        <p>Experience tsunami alerts, storm warnings, fishing zone decisions, and navigation challenges
+                            based on real ocean advisory data formats.</p>
+                    </article>
+                    <article class="feature-card">
+                        <span class="feature-icon" aria-hidden="true">🧠</span>
+                        <h3>BUILD OCEAN KNOWLEDGE</h3>
+                        <p>Learn wave heights, fish zones, weather patterns, maritime law, and emergency protocols.
+                            Knowledge that could save your life at sea.</p>
+                    </article>
+                    <article class="feature-card">
+                        <span class="feature-icon" aria-hidden="true">🏆</span>
+                        <h3>COMPETE & CLIMB</h3>
+                        <p>Earn XP, level up from Ocean Rookie to Ocean Master, unlock achievements, and compete on
+                            daily, weekly, and all-time leaderboards.</p>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Why Section -->
+            <section class="why-section" aria-labelledby="why-heading">
+                <div class="why-inner">
+                    <h2 class="section-title" id="why-heading">WHY OCEAN LITERACY MATTERS</h2>
+                    <p class="section-sub">Understanding ocean conditions helps people make safer, more sustainable
+                        decisions at sea and on the coast.</p>
+                    <div class="why-grid">
+                        <div class="why-item">
+                            <span class="stat-num">80%</span>
+                            <p>of fishermen who died at sea had no access to timely ocean advisory information</p>
+                        </div>
+                        <div class="why-item">
+                            <span class="stat-num">1.4B</span>
+                            <p>people depend on ocean-based livelihoods globally — literacy means survival</p>
+                        </div>
+                        <div class="why-item">
+                            <span class="stat-num">7,516 km</span>
+                            <p>India's coastline borders three major water bodies — understanding them is critical</p>
+                        </div>
+                        <div class="why-item">
+                            <span class="stat-num">INCOIS</span>
+                            <p>India's ocean advisory service issues warnings that can save thousands of lives annually
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:3rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+                        <button class="btn btn-primary btn-lg" onclick="startGameFlow()">START PLAYING NOW 🎮</button>
+                        <button class="btn btn-secondary" onclick="showPage('learn')">EXPLORE OCEAN KNOWLEDGE
+                            📚</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- ══ PAGE: DASHBOARD ══ -->
+        <section id="page-dashboard" class="page" aria-label="Player Dashboard">
+            <div class="dashboard-inner">
+                <div class="welcome-bar">
+                    <div class="welcome-text">
+                        <h2>Welcome back, Ocean Guardian! 🌊</h2>
+                        <p id="dash-role-text">You are a <strong class="text-cyan" id="dash-role">—</strong> · <span
+                                id="dash-level-name">Sea Commander</span></p>
+                    </div>
+                    <div class="daily-streak">
+                        🔥 <span id="dash-streak">5</span> Day Streak
+                    </div>
+                </div>
+
+                <!-- XP Progress -->
+                <div class="xp-section card">
+                    <div class="xp-ring-wrap">
+                        <svg class="xp-ring" width="120" height="120" viewBox="0 0 120 120"
+                            aria-label="XP progress ring" role="img">
+                            <defs>
+                                <linearGradient id="xpGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#00d4ff" />
+                                    <stop offset="100%" stop-color="#00e5cc" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="xp-ring-bg" cx="60" cy="60" r="50" />
+                            <circle class="xp-ring-fill" cx="60" cy="60" r="50" style="--pct:78" />
+                        </svg>
+                        <div class="xp-label">
+                            <span class="xp-level">LEVEL</span>
+                            <span class="xp-num" id="dash-level">07</span>
+                        </div>
+                    </div>
+                    <div class="xp-info">
+                        <h3 id="xp-title">LEVEL 07 — Sea Commander</h3>
+                        <div class="xp-bar-wrap">
+                            <div class="xp-bar-fill" id="xp-bar" style="width:78%"></div>
+                        </div>
+                        <p class="xp-count"><span id="xp-current">1,560</span> / <span id="xp-max">2,000</span> XP ·
+                            <span class="text-cyan" id="xp-pct">78%</span> to next level</p>
+                        <div style="margin-top:1rem;display:flex;gap:0.8rem;flex-wrap:wrap;">
+                            <div class="stat-card" style="padding:0.8rem;flex:1;min-width:100px;">
+                                <div class="label">Points</div>
+                                <div class="value" id="dash-points">4,350</div>
+                            </div>
+                            <div class="stat-card" style="padding:0.8rem;flex:1;min-width:100px;">
+                                <div class="label">Global Rank</div>
+                                <div class="value" id="dash-rank">#8</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="label">Missions</div>
+                        <div class="value" id="stat-missions">14</div>
+                        <div class="sub">Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Correct Decisions</div>
+                        <div class="value" id="stat-correct">31</div>
+                        <div class="sub">Right calls</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Ocean IQ</div>
+                        <div class="value" id="stat-iq">78%</div>
+                        <div class="sub">Knowledge score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Best Streak</div>
+                        <div class="value" id="stat-streak">🔥 5</div>
+                        <div class="sub">In a row</div>
+                    </div>
+                </div>
+
+                <!-- Mission CTA + Challenges -->
+                <div class="dash-grid">
+                    <div class="dash-col">
+                        <div class="mission-cta card">
+                            <h3>READY FOR YOUR NEXT MISSION?</h3>
+                            <p>Continue your ocean journey. New scenarios, ocean conditions, and decisions await.</p>
+                            <button class="btn btn-primary btn-lg w-full" onclick="showPage('game')"
+                                aria-label="Continue mission">
+                                CONTINUE MISSION →
+                            </button>
+                        </div>
+                        <div class="card">
+                            <h3
+                                style="font-family:var(--font-mono);font-size:0.85rem;color:var(--cyan);margin-bottom:1rem;letter-spacing:1px;">
+                                YOUR ROLE</h3>
+                            <div style="text-align:center;padding:1rem 0;">
+                                <div style="font-size:4rem;margin-bottom:0.5rem;" id="dash-role-emoji">🎣</div>
+                                <div style="font-family:var(--font-mono);font-size:1.1rem;color:var(--text-primary);"
+                                    id="dash-role-display">Select a Role</div>
+                                <div style="font-size:0.8rem;color:var(--text-muted);margin:0.5rem 0 1rem;"
+                                    id="dash-role-desc">Start with a role to personalize your missions</div>
+                                <button class="btn btn-secondary btn-sm" onclick="showPage('roles')">CHANGE
+                                    ROLE</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dash-col">
+                        <div class="card">
+                            <h3
+                                style="font-family:var(--font-mono);font-size:0.85rem;color:var(--cyan);margin-bottom:1rem;letter-spacing:1px;">
+                                CHALLENGES</h3>
+                            <div class="challenge-item" onclick="showPage('daily')" role="button" tabindex="0"
+                                aria-label="Daily ocean challenge">
+                                <div class="challenge-icon">🌊</div>
+                                <div class="challenge-info">
+                                    <h4>Daily Ocean Challenge</h4>
+                                    <p>A sudden high-wave warning near the coast</p>
+                                </div>
+                                <div class="challenge-reward">+250 XP</div>
+                            </div>
+                            <div class="challenge-item" onclick="showPage('game')" role="button" tabindex="0"
+                                aria-label="Weekly mission pack">
+                                <div class="challenge-icon">⭐</div>
+                                <div class="challenge-info">
+                                    <h4>Weekly Mission Pack</h4>
+                                    <p>Complete 5 missions this week</p>
+                                </div>
+                                <div class="challenge-reward">+1,000 XP</div>
+                            </div>
+                            <div class="challenge-item" onclick="showPage('quiz')" role="button" tabindex="0"
+                                aria-label="Weekly quiz challenge">
+                                <div class="challenge-icon">🎯</div>
+                                <div class="challenge-info">
+                                    <h4>Ocean Knowledge Quiz</h4>
+                                    <p>Score 80%+ on the expert quiz</p>
+                                </div>
+                                <div class="challenge-reward">+500 XP</div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3
+                                style="font-family:var(--font-mono);font-size:0.85rem;color:var(--cyan);margin-bottom:1rem;letter-spacing:1px;">
+                                RECENT ACHIEVEMENTS</h3>
+                            <div id="recent-achievements"></div>
+                            <button class="btn btn-glass btn-sm mt-2" style="width:100%;"
+                                onclick="showPage('achievements')">VIEW ALL ACHIEVEMENTS →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══ PAGE: ROLES ══ -->
+        <section id="page-roles" class="page" aria-label="Role Selection">
+            <div class="roles-inner">
+                <div class="page-header" style="padding-bottom:1rem;">
+                    <h1>CHOOSE YOUR ROLE</h1>
+                    <p>Each role gives you unique missions, scenarios, and ocean challenges. Choose the one that matches
+                        your interests.</p>
+                </div>
+
+                <div class="roles-grid" id="roles-grid">
+                    <!-- Roles rendered by JS -->
+                </div>
+
+                <div style="text-align:center;margin-top:2rem;">
+                    <button class="btn btn-primary btn-lg" id="confirm-role-btn" onclick="confirmRole()" disabled
+                        aria-label="Select chosen role">
+                        SELECT ROLE & START MISSION
+                    </button>
+                    <p class="text-muted mt-1" style="font-size:0.85rem;">You can change your role at any time from the
+                        dashboard</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══ PAGE: GAME ══ -->
+        <section id="page-game" class="page" aria-label="Main Game Screen">
+            <!-- HUD -->
+            <div class="game-hud" aria-label="Game status">
+                <div class="hud-item">
+                    <span class="hud-label">Level</span>
+                    <span class="hud-value" id="g-level">07</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">XP</span>
+                    <span class="hud-value" id="g-xp">1,560</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Score</span>
+                    <span class="hud-value gold" id="g-score">4,350</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Streak</span>
+                    <span class="hud-value orange" id="g-streak">🔥 5</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Mission</span>
+                    <span class="hud-value" id="g-mission-num">1 / 8</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Time</span>
+                    <span class="hud-value timer-val" id="g-timer">60</span>
+                </div>
+                <button class="btn btn-glass btn-sm" onclick="showPage('dashboard')" aria-label="Exit game">←
+                    EXIT</button>
+            </div>
+
+            <div class="game-layout">
+                <!-- Left sidebar: Mission progress -->
+                <aside class="game-sidebar" aria-label="Mission progress">
+                    <div>
+                        <h3>MISSIONS</h3>
+                        <div id="mission-progress-list"></div>
+                    </div>
+                    <div style="margin-top:auto;">
+                        <h3>ROLE</h3>
+                        <div style="text-align:center;font-size:2.5rem;padding:0.5rem 0;" id="sidebar-role-emoji">🎣
+                        </div>
+                        <div style="font-size:0.8rem;color:var(--text-secondary);text-align:center;"
+                            id="sidebar-role-name">Fisherman</div>
+                    </div>
+                </aside>
+
+                <!-- Main game area -->
+                <main class="game-main" aria-label="Game mission">
+                    <div class="mission-header" id="mission-header">
+                        <div class="mission-subtitle" id="mission-subtitle">MISSION 01 — FISHING DECISION</div>
+                        <h2 class="mission-title" id="mission-title">Find the Fish</h2>
+                        <p class="mission-desc" id="mission-desc">Loading mission...</p>
+                    </div>
+
+                    <div class="question-box" aria-labelledby="question-heading">
+                        <h3 id="question-heading" id="question-text">Loading question...</h3>
+                        <div class="options-grid" id="options-container" role="group" aria-label="Answer choices"></div>
+                    </div>
+
+                    <div class="result-panel" id="result-panel" role="alert">
+                        <div class="result-heading" id="result-heading">✅ CORRECT DECISION!</div>
+                        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+                            <span class="points-pop positive" id="result-points">+150 pts</span>
+                            <span class="points-pop positive" id="result-xp">+75 XP</span>
+                        </div>
+                        <div class="result-feedback" id="result-feedback">Great choice!</div>
+                        <div class="result-explanation" id="result-explanation"></div>
+                        <div style="margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap;">
+                            <button class="btn btn-primary" id="next-mission-btn" onclick="nextMission()"
+                                aria-label="Go to next mission">NEXT MISSION →</button>
+                            <button class="btn btn-glass btn-sm" onclick="showPage('advisory')"
+                                aria-label="Review ocean conditions">📊 Review Ocean Data</button>
+                        </div>
+                    </div>
+                </main>
+
+                <!-- Right panel: Ocean Info -->
+                <aside class="game-info-panel" aria-label="Simulated ocean conditions">
+                    <div class="info-panel-title">🌊 OCEAN CONDITIONS</div>
+                    <p
+                        style="font-size:0.7rem;color:var(--text-muted);margin-bottom:1rem;padding:0.5rem;background:rgba(255,170,0,0.08);border-radius:6px;border:1px solid rgba(255,170,0,0.2);">
+                        ⚠ SIMULATED DATA — For educational purposes only
+                    </p>
+                    <div id="ocean-conditions-panel"></div>
+
+                    <div style="margin-top:1.5rem;">
+                        <div class="info-panel-title">⚠ ALERTS</div>
+                        <div id="alerts-panel"></div>
+                    </div>
+
+                    <div style="margin-top:1.5rem;">
+                        <div class="info-panel-title">📍 ZONE</div>
+                        <div style="font-size:0.85rem;color:var(--text-secondary);padding:0.8rem;background:var(--glass);border-radius:var(--border-sm);"
+                            id="zone-info">
+                            Arabian Sea — Zone A
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <!-- ══ PAGE: OCEAN MAP ══ -->
+        <section id="page-map" class="page" aria-label="Interactive Ocean Map">
+            <div class="map-wrapper">
+                <div class="map-canvas">
+                    <svg class="map-svg" id="ocean-map-svg" viewBox="0 0 900 600"
+                        aria-label="Interactive ocean map of Indian Ocean region" role="img">
+                        <!-- Ocean background -->
+                        <defs>
+                            <radialGradient id="oceanGrad" cx="50%" cy="50%" r="60%">
+                                <stop offset="0%" stop-color="#062040" />
+                                <stop offset="100%" stop-color="#020b18" />
+                            </radialGradient>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur" />
+                                    <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                            </filter>
+                        </defs>
+
+                        <!-- Ocean fill -->
+                        <rect width="900" height="600" fill="url(#oceanGrad)" />
+
+                        <!-- Grid lines (latitude/longitude style) -->
+                        <g stroke="rgba(0,212,255,0.05)" stroke-width="1">
+                            <line x1="0" y1="100" x2="900" y2="100" />
+                            <line x1="0" y1="200" x2="900" y2="200" />
+                            <line x1="0" y1="300" x2="900" y2="300" />
+                            <line x1="0" y1="400" x2="900" y2="400" />
+                            <line x1="0" y1="500" x2="900" y2="500" />
+                            <line x1="100" y1="0" x2="100" y2="600" />
+                            <line x1="200" y1="0" x2="200" y2="600" />
+                            <line x1="300" y1="0" x2="300" y2="600" />
+                            <line x1="400" y1="0" x2="400" y2="600" />
+                            <line x1="500" y1="0" x2="500" y2="600" />
+                            <line x1="600" y1="0" x2="600" y2="600" />
+                            <line x1="700" y1="0" x2="700" y2="600" />
+                            <line x1="800" y1="0" x2="800" y2="600" />
+                        </g>
+
+                        <!-- Indian subcontinent (simplified) -->
+                        <g id="india-landmass">
+                            <path
+                                d="M280,60 L400,50 L480,70 L520,90 L530,130 L520,170 L500,200 L490,240 L470,280 L450,320 L430,370 L410,410 L390,440 L370,460 L350,470 L330,465 L310,450 L295,420 L285,390 L280,350 L270,310 L260,270 L255,230 L255,190 L260,150 L265,110 L270,80 Z"
+                                fill="#0a2a1a" stroke="rgba(0,212,255,0.3)" stroke-width="1.5" />
+                            <!-- Western Ghats -->
+                            <path d="M260,270 L270,320 L275,370 L280,410 L285,430" stroke="rgba(0,150,50,0.3)"
+                                stroke-width="3" fill="none" />
+                            <!-- Labels -->
+                            <text x="350" y="200" fill="rgba(255,255,255,0.5)" font-size="14"
+                                font-family="Orbitron,monospace" text-anchor="middle">INDIA</text>
+                            <text x="295" y="380" fill="rgba(0,212,255,0.6)" font-size="8"
+                                text-anchor="middle">Kerala</text>
+                            <text x="460" y="390" fill="rgba(0,212,255,0.6)" font-size="8" text-anchor="middle">Tamil
+                                Nadu</text>
+                            <text x="240" y="130" fill="rgba(0,212,255,0.6)" font-size="8"
+                                text-anchor="middle">Mumbai</text>
+                            <!-- Mumbai dot -->
+                            <circle cx="245" cy="140" r="4" fill="rgba(0,212,255,0.6)" />
+                        </g>
+
+                        <!-- Sri Lanka -->
+                        <path d="M400,480 L420,475 L430,490 L425,510 L410,515 L398,505 Z" fill="#0a2a1a"
+                            stroke="rgba(0,212,255,0.3)" stroke-width="1" />
+                        <text x="414" y="500" fill="rgba(255,255,255,0.4)" font-size="7" text-anchor="middle">Sri
+                            Lanka</text>
+
+                        <!-- Region labels -->
+                        <text x="150" y="300" fill="rgba(0,180,255,0.4)" font-size="13" font-family="Orbitron,monospace"
+                            text-anchor="middle" transform="rotate(-15,150,300)">ARABIAN SEA</text>
+                        <text x="620" y="300" fill="rgba(0,180,255,0.4)" font-size="12" font-family="Orbitron,monospace"
+                            text-anchor="middle">BAY OF BENGAL</text>
+                        <text x="400" y="570" fill="rgba(0,180,255,0.3)" font-size="12" font-family="Orbitron,monospace"
+                            text-anchor="middle">INDIAN OCEAN</text>
+
+                        <!-- Zone markers — rendered by JS -->
+                        <g id="map-markers"></g>
+
+                        <!-- Wave animation overlay -->
+                        <g opacity="0.15">
+                            <path d="M0,580 Q225,570 450,580 Q675,590 900,580 L900,600 L0,600 Z"
+                                fill="rgba(0,212,255,0.3)">
+                                <animateTransform attributeName="transform" type="translate" values="0 0; -225 0; 0 0"
+                                    dur="8s" repeatCount="indefinite" />
+                            </path>
+                        </g>
+                    </svg>
+                </div>
+
+                <aside class="map-info" aria-label="Zone information panel">
+                    <h2>🗺 OCEAN ZONES</h2>
+                    <div class="zone-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot safe"></div> Safe Zone
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot caution"></div> Caution Zone
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot danger"></div> Danger / Alert Zone
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot fish"></div> Fish Potential Zone
+                        </div>
+                    </div>
+                    <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;">Click a zone marker on the
+                        map to see detailed conditions.</p>
+
+                    <div class="map-zone-card" id="map-zone-card">
+                        <div class="map-zone-name" id="mz-name">—</div>
+                        <div id="mz-safety" class="mb-2"></div>
+                        <div id="mz-conditions"></div>
+                        <div id="mz-alerts" style="margin:1rem 0;"></div>
+                        <button class="btn btn-primary btn-sm w-full" onclick="useZoneInGame()" id="mz-use-btn">USE THIS
+                            ZONE IN MISSION</button>
+                    </div>
+                    <div id="map-zone-default">
+                        <div style="text-align:center;padding:2rem;color:var(--text-muted);">
+                            <div style="font-size:3rem;margin-bottom:0.5rem;">🗺</div>
+                            <p style="font-size:0.85rem;">Select a zone on the map to view detailed ocean conditions</p>
+                        </div>
+                    </div>
+
+                    <div
+                        style="margin-top:2rem;padding:1rem;background:rgba(255,170,0,0.06);border:1px solid rgba(255,170,0,0.2);border-radius:var(--border-sm);">
+                        <p style="font-size:0.75rem;color:var(--warning);">⚠ SIMULATED DATA — This prototype uses demo
+                            ocean conditions. For real-time advisories, visit incois.gov.in</p>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <!-- ══ PAGE: LEADERBOARD ══ -->
+        <section id="page-leaderboard" class="page" aria-label="Leaderboard">
+            <div class="lb-inner">
+                <div class="page-header">
+                    <h1>LEADERBOARD</h1>
+                    <p>Compete with ocean guardians from across India</p>
+                </div>
+
+                <!-- Podium -->
+                <div class="podium" id="podium" aria-label="Top 3 players"></div>
+
+                <!-- Tabs -->
+                <div class="lb-tabs" role="tablist" aria-label="Leaderboard time period">
+                    <button class="lb-tab active" id="lb-tab-daily" onclick="setLbTab('daily')" role="tab"
+                        aria-selected="true">Daily</button>
+                    <button class="lb-tab" id="lb-tab-weekly" onclick="setLbTab('weekly')" role="tab"
+                        aria-selected="false">Weekly</button>
+                    <button class="lb-tab" id="lb-tab-monthly" onclick="setLbTab('monthly')" role="tab"
+                        aria-selected="false">Monthly</button>
+                    <button class="lb-tab" id="lb-tab-all" onclick="setLbTab('all')" role="tab"
+                        aria-selected="false">All Time</button>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table class="lb-table" id="lb-table" aria-label="Leaderboard rankings">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>Role</th>
+                                <th>Points</th>
+                                <th>Level</th>
+                                <th>Streak</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lb-body"></tbody>
+                    </table>
+                </div>
+
+                <div
+                    style="margin-top:2rem;padding:1.5rem;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.2);border-radius:var(--border-radius);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);">YOUR RANK</div>
+                        <div style="font-family:var(--font-mono);font-size:1.5rem;color:var(--cyan);">#8</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);">YOUR POINTS</div>
+                        <div style="font-family:var(--font-mono);font-size:1.5rem;color:var(--gold);">4,350</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);">POINTS TO NEXT RANK</div>
+                        <div style="font-family:var(--font-mono);font-size:1.5rem;color:var(--success);">+300 pts</div>
+                    </div>
+                    <button class="btn btn-primary" onclick="showPage('game')">PLAY TO CLIMB! 🚀</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══ PAGE: LEARN ══ -->
+        <section id="page-learn" class="page" aria-label="Ocean Learning Center">
+            <div class="learn-inner">
+                <div class="page-header">
+                    <h1>OCEAN KNOWLEDGE</h1>
+                    <p>Learn about ocean science, safety, marine life, and sustainability through interactive modules
+                    </p>
+                </div>
+
+                <div class="learn-cats" role="group" aria-label="Category filter">
+                    <button class="cat-pill active" onclick="filterLessons('all')" id="cat-all">All Topics</button>
+                    <button class="cat-pill" onclick="filterLessons('Ocean Basics')" id="cat-basics">🌊 Ocean
+                        Basics</button>
+                    <button class="cat-pill" onclick="filterLessons('Marine Life')" id="cat-life">🐟 Marine
+                        Life</button>
+                    <button class="cat-pill" onclick="filterLessons('Ocean & Weather')" id="cat-weather">🌦 Ocean &
+                        Weather</button>
+                    <button class="cat-pill" onclick="filterLessons('Extreme Events')" id="cat-extreme">🌪 Extreme
+                        Events</button>
+                    <button class="cat-pill" onclick="filterLessons('Sustainable Fishing')" id="cat-fishing">🎣
+                        Sustainable Fishing</button>
+                    <button class="cat-pill" onclick="filterLessons('Maritime Safety')" id="cat-safety">🚢 Maritime
+                        Safety</button>
+                    <button class="cat-pill" onclick="filterLessons('Ocean Conservation')" id="cat-conservation">🌱
+                        Conservation</button>
+                    <button class="cat-pill" onclick="filterLessons('Climate & Ocean')" id="cat-climate">🌡
+                        Climate</button>
+                </div>
+
+                <div class="lessons-grid" id="lessons-grid"></div>
+            </div>
+        </section>
+
+        <!-- ══ PAGE: QUIZ ══ -->
+        <section id="page-quiz" class="page" aria-label="Ocean Knowledge Quiz">
+            <div class="quiz-inner">
+                <div class="page-header">
+                    <h1>OCEAN IQ QUIZ</h1>
+                    <p>Test your ocean knowledge. Get instant feedback and earn XP for every correct answer.</p>
+                </div>
+
+                <div id="quiz-setup">
+                    <p style="text-align:center;color:var(--text-secondary);margin-bottom:1.5rem;">Select difficulty
+                        level:</p>
+                    <div class="quiz-diff-select" role="group" aria-label="Quiz difficulty">
+                        <button class="diff-btn" data-diff="easy" id="qd-easy" onclick="selectDifficulty('easy')">🟢
+                            EASY</button>
+                        <button class="diff-btn" data-diff="medium" id="qd-medium"
+                            onclick="selectDifficulty('medium')">🟡 MEDIUM</button>
+                        <button class="diff-btn" data-diff="hard" id="qd-hard" onclick="selectDifficulty('hard')">🔴
+                            HARD</button>
+                    </div>
+                    <div style="text-align:center;margin-top:2rem;">
+                        <button class="btn btn-primary btn-lg" id="start-quiz-btn" onclick="startQuiz()" disabled
+                            aria-label="Start quiz">
+                            START QUIZ 🎯
+                        </button>
+                    </div>
+                </div>
+
+                <div id="quiz-game" style="display:none;">
+                    <div class="quiz-timer" id="quiz-timer" aria-live="polite" aria-label="Time remaining">30s</div>
+                    <div class="quiz-progress-bar" role="progressbar" aria-label="Quiz progress">
+                        <div class="quiz-prog-fill" id="quiz-prog"></div>
+                    </div>
+                    <div class="quiz-q-box show" id="quiz-q-box">
+                        <div class="quiz-q-num" id="quiz-q-num">QUESTION 1 OF 5</div>
+                        <div class="quiz-question" id="quiz-q-text">Loading...</div>
+                        <div class="quiz-options" id="quiz-options" role="group" aria-label="Answer options"></div>
+                        <div class="quiz-explanation" id="quiz-explanation"></div>
+                        <div style="margin-top:1.5rem;text-align:right;display:none;" id="quiz-next-wrap">
+                            <button class="btn btn-primary btn-sm" onclick="nextQuizQuestion()"
+                                aria-label="Next question">Next Question →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quiz-result" id="quiz-result" aria-live="polite">
+                    <div class="ocean-iq-circle" id="iq-circle" style="--score-pct:82">
+                        <div class="ocean-iq-num" id="iq-score">82%</div>
+                    </div>
+                    <div class="quiz-grade" id="quiz-grade">OCEAN GUARDIAN</div>
+                    <div class="quiz-msg" id="quiz-msg">Excellent! You are becoming an Ocean Guardian.</div>
+                    <div style="margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+                        <button class="btn btn-primary" onclick="restartQuiz()" aria-label="Take another quiz">TRY
+                            AGAIN</button>
+                        <button class="btn btn-secondary" onclick="showPage('leaderboard')"
+                            aria-label="View leaderboard">VIEW LEADERBOARD</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══ PAGE: ACHIEVEMENTS ══ -->
+        <section id="page-achievements" class="page" aria-label="Achievements">
+            <div class="ach-inner">
+                <div class="page-header">
+                    <h1>ACHIEVEMENTS</h1>
+                    <p>Unlock badges by completing missions, making correct decisions, and building ocean knowledge</p>
+                </div>
+                <div style="display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;">
+                    <div class="stat-card" style="flex:1;min-width:120px;">
+                        <div class="label">Unlocked</div>
+                        <div class="value text-gold" id="ach-unlocked-count">4</div>
+                    </div>
+                    <div class="stat-card" style="flex:1;min-width:120px;">
+                        <div class="label">Total</div>
+                        <div class="value">12</div>
+                    </div>
+                    <div class="stat-card" style="flex:1;min-width:120px;">
+                        <div class="label">XP Earned</div>
+                        <div class="value text-cyan" id="ach-xp-total">350</div>
+                    </div>
+                </div>
+                <div class="ach-grid" id="ach-grid"></div>
+            </div>
+        </section>
+
+        <!-- ══ PAGE: EMERGENCY SIMULATOR ══ -->
+        <section id="page-emergency" class="page" aria-label="Emergency Simulator">
+            <div class="emg-inner">
+                <div class="page-header">
+                    <h1>EMERGENCY SIMULATOR</h1>
+                    <p>Practice rapid response to ocean emergencies. React fast — every second counts!</p>
+                </div>
+
+                <div class="emg-select" role="group" aria-label="Choose emergency type">
+                    <button class="emg-btn" id="emg-tsunami" onclick="loadEmergency('tsunami')">🌊 Tsunami</button>
+                    <button class="emg-btn" id="emg-cyclone" onclick="loadEmergency('cyclone')">🌪 Cyclone</button>
+                    <button class="emg-btn" id="emg-highwave" onclick="loadEmergency('highwave')">🌊 High Waves</button>
+                    <button class="emg-btn" id="emg-mayday" onclick="loadEmergency('mayday')">🚨 MAYDAY</button>
+                    <button class="emg-btn" id="emg-fog" onclick="loadEmergency('fog')">🌫 Poor Visibility</button>
+                </div>
+
+                <div id="emg-scenarios"></div>
+
+                <div id="emg-placeholder" style="text-align:center;padding:3rem;color:var(--text-muted);">
+                    <div style="font-size:4rem;margin-bottom:1rem;">🚨</div>
+                    <p>Select an emergency type above to begin the simulation</p>
+                    <p style="font-size:0.8rem;margin-top:0.5rem;color:var(--text-muted);">Can you make the right
+                        decision in time?</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══ PAGE: DAILY CHALLENGE ══ -->
+        <section id="page-daily" class="page" aria-label="Daily Challenge">
+            <div class="daily-inner">
+                <div class="daily-banner">
+                    <div class="day-num">📅 TODAY'S CHALLENGE — Day 15</div>
+                    <h2>🌊 DAILY OCEAN CHALLENGE</h2>
+                    <p>A sudden high-wave warning has appeared near the southern coast. Make the correct safety
+                        decision.</p>
+                </div>
+
+                <div style="text-align:center;margin-bottom:2rem;">
+                    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem;">Next challenge resets in:
+                    </p>
+                    <div class="countdown-timer" aria-label="Countdown to next challenge">
+                        <div class="countdown-block"><span class="countdown-num" id="cd-hours">08</span><span
+                                class="countdown-label">Hours</span></div>
+                        <div class="countdown-block"><span class="countdown-num" id="cd-mins">34</span><span
+                                class="countdown-label">Minutes</span></div>
+                        <div class="countdown-block"><span class="countdown-num" id="cd-secs">52</span><span
+                                class="countdown-label">Seconds</span></div>
+                    </div>
+                </div>
+
+                <div class="daily-reward-row" aria-label="Challenge rewards">
+                    <div class="reward-chip xp">⚡ +250 XP</div>
+                    <div class="reward-chip pts">🏆 +100 Ocean Points</div>
+                    <div class="reward-chip streak">🔥 +1 Streak Day</div>
+                </div>
+
+                <!-- Daily mission (reuses game mission structure) -->
+                <div class="card" style="margin-bottom:1.5rem;">
+                    <div class="mission-subtitle">TODAY'S SCENARIO</div>
+                    <div class="mission-title"
+                        style="font-family:var(--font-mono);font-size:1.3rem;color:var(--text-primary);margin:0.5rem 0;">
+                        Rising Waves Alert</div>
+                    <p class="mission-desc">You are 30km offshore when the ocean advisory system issues a HIGH WAVE
+                        WARNING. Wave heights are currently 2.5m and rising rapidly. Wind speed: 40 km/h.</p>
+                    <div
+                        style="margin-top:1rem;padding:1rem;background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.2);border-radius:var(--border-sm);">
+                        <div
+                            style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.8rem;text-transform:uppercase;letter-spacing:1px;">
+                            Current Conditions</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.8rem;">
+                            <div class="ocean-data-item"><span class="od-label">🌊 Wave Height</span><span
+                                    class="od-value warning">2.5 m ↑</span></div>
+                            <div class="ocean-data-item"><span class="od-label">💨 Wind Speed</span><span
+                                    class="od-value warning">40 km/h</span></div>
+                            <div class="ocean-data-item"><span class="od-label">⚠ Alert</span><span
+                                    class="od-value danger">HIGH WAVE</span></div>
+                            <div class="ocean-data-item"><span class="od-label">🌡 Sea Temp</span><span
+                                    class="od-value">27.8°C</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size:1rem;font-weight:600;color:var(--text-primary);margin-bottom:1.2rem;">What is
+                        the correct action?</h3>
+                    <div id="daily-options" class="options-grid"></div>
+                    <div id="daily-result" class="result-panel mt-2"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══ PAGE: OCEAN ADVISORY ══ -->
+        <section id="page-advisory" class="page" aria-label="Simulated Ocean Advisory Dashboard">
+            <div class="advisory-inner">
+                <div class="page-header">
+                    <h1>OCEAN ADVISORY DASHBOARD</h1>
+                    <p>Simulated ocean conditions for educational purposes</p>
+                </div>
+                <div class="advisory-banner" role="note">
+                    ⚠ SIMULATED ADVISORY DATA — This prototype demonstrates the format of ocean advisory information.
+                    For real-time official ocean data, visit <strong>incois.gov.in</strong>
+                </div>
+
+                <h3 style="font-family:var(--font-mono);font-size:1rem;color:var(--cyan);margin-bottom:1.5rem;">CURRENT
+                    CONDITIONS — Arabian Sea Zone A</h3>
+                <div class="advisory-grid" id="advisory-grid">
+                    <!-- Rendered by JS -->
+                </div>
+
+                <h3 style="font-family:var(--font-mono);font-size:1rem;color:var(--cyan);margin:2rem 0 1rem;">ACTIVE
+                    ALERTS</h3>
+                <div class="alert-grid" id="alert-grid">
+                    <!-- Rendered by JS -->
+                </div>
+
+                <h3 style="font-family:var(--font-mono);font-size:1rem;color:var(--cyan);margin:2rem 0 1rem;">REGIONAL
+                    ZONE SUMMARY</h3>
+                <div style="overflow-x:auto;">
+                    <table class="lb-table" aria-label="Regional zone conditions summary">
+                        <thead>
+                            <tr>
+                                <th>Zone</th>
+                                <th>Wave Height</th>
+                                <th>Wind</th>
+                                <th>Fish Zone</th>
+                                <th>Safety</th>
+                                <th>Alerts</th>
+                            </tr>
+                        </thead>
+                        <tbody id="zone-summary-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══ PAGE: PROFILE ══ -->
+        <section id="page-profile" class="page" aria-label="Player Profile">
+            <div class="profile-inner">
+                <div class="page-header">
+                    <h1>MY PROFILE</h1>
+                    <p>Your ocean guardian journey so far</p>
+                </div>
+
+                <div class="profile-header">
+                    <div class="profile-avatar" aria-hidden="true">🌊</div>
+                    <div class="profile-info">
+                        <h2 id="prof-name">OceanGuardian</h2>
+                        <p id="prof-username">@ocean_hero</p>
+                        <div class="profile-tags">
+                            <span class="profile-tag" id="prof-role-tag">🎣 Fisherman</span>
+                            <span class="profile-tag" id="prof-level-tag">⭐ Level 7</span>
+                            <span class="profile-tag" id="prof-iq-tag">🧠 Ocean IQ: 78%</span>
+                            <span class="profile-tag" id="prof-rank-tag">🏆 Rank #8</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-glass btn-sm" onclick="openAuth('login')" style="margin-left:auto;">Edit
+                        Profile</button>
+                </div>
+
+                <div class="profile-stats-grid">
+                    <div class="stat-card">
+                        <div class="label">Total Points</div>
+                        <div class="value" id="prof-points">4,350</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Total XP</div>
+                        <div class="value" id="prof-xp">1,560</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Missions Done</div>
+                        <div class="value" id="prof-missions">14</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Best Streak</div>
+                        <div class="value" id="prof-streak">🔥 5</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Ocean IQ</div>
+                        <div class="value" id="prof-iq">78%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Global Rank</div>
+                        <div class="value" id="prof-rank">#8</div>
+                    </div>
+                </div>
+
+                <div class="mission-history">
+                    <h3>Mission History</h3>
+                    <div id="mission-history-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══ PAGE: ABOUT ══ -->
+        <section id="page-about" class="page" aria-label="About OceanQuest">
+            <div class="about-inner">
+                <div class="page-header">
+                    <h1>ABOUT OCEANQUEST</h1>
+                    <p>Smart India Hackathon 2026 — Problem Statement SIH1660</p>
+                </div>
+
+                <div class="about-card">
+                    <div class="sih-badge">🏆 Smart India Hackathon 2026 — SIH1660</div>
+                    <h2>Interactive Gamified Approach to Ocean Literacy</h2>
+                    <p>OceanQuest is a browser-based ocean literacy gamification platform developed in response to the
+                        Smart India Hackathon 2026 problem statement SIH1660. The platform aims to educate students,
+                        fishermen, coastal communities, tourists, and maritime professionals about ocean safety,
+                        sustainable practices, and emergency response.</p>
+                    <p>The application enables users to select roles such as fisherman, ship captain, and tourism
+                        operator, use simulated ocean information to make decisions, and learn through the consequences
+                        of those decisions — earning points for correct choices and receiving educational explanations
+                        for incorrect ones.</p>
+                </div>
+
+                <div class="about-card">
+                    <h2>Organization</h2>
+                    <p><strong class="text-cyan">Host Organization:</strong> Ministry of Earth Sciences / INCOIS (Indian
+                        National Centre for Ocean Information Services)</p>
+                    <p>INCOIS provides ocean information and advisory services to society, industry, government
+                        agencies, and the scientific community. OceanQuest's architecture is designed to allow seamless
+                        integration with real INCOIS APIs and ocean data once available.</p>
+                </div>
+
+                <div class="about-card">
+                    <h2>Technology Stack</h2>
+                    <div class="tech-stack">
+                        <span class="tech-chip">HTML5</span>
+                        <span class="tech-chip">CSS3</span>
+                        <span class="tech-chip">Vanilla JavaScript</span>
+                        <span class="tech-chip">SVG Maps</span>
+                        <span class="tech-chip">CSS Animations</span>
+                        <span class="tech-chip">Glassmorphism UI</span>
+                        <span class="tech-chip">Responsive Design</span>
+                        <span class="tech-chip">Simulated Ocean API</span>
+                    </div>
+                    <p style="margin-top:1rem;font-size:0.85rem;color:var(--text-muted);">Backend-ready architecture:
+                        Python/Flask + SQLite (prototype) → PostgreSQL (production). Modular design allows INCOIS API
+                        integration and admin-managed content updates post-hackathon.</p>
+                </div>
+
+                <div class="about-card">
+                    <h2>Game Flow</h2>
+                    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;">
+                        <span class="tech-chip text-cyan">Landing</span> → <span class="tech-chip">Login/Guest</span> →
+                        <span class="tech-chip">Dashboard</span> → <span class="tech-chip">Choose Role</span> → <span
+                            class="tech-chip">Tutorial</span> → <span class="tech-chip">Mission</span> → <span
+                            class="tech-chip">Ocean Data</span> → <span class="tech-chip">Decision</span> → <span
+                            class="tech-chip">Evaluation</span> → <span class="tech-chip text-gold">XP + Points</span> →
+                        <span class="tech-chip">Learning</span> → <span class="tech-chip">Next Mission</span> → <span
+                            class="tech-chip">Level Up</span> → <span class="tech-chip text-cyan">Leaderboard</span>
+                    </div>
+                </div>
+
+                <div style="text-align:center;margin-top:2rem;">
+                    <button class="btn btn-primary btn-lg" onclick="startGameFlow()">BEGIN YOUR OCEAN JOURNEY
+                        🌊</button>
+                </div>
+            </div>
+        </section>
+
+    </div> <!-- #app -->
+
+    <script src="game-data.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
